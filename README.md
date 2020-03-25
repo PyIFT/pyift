@@ -6,6 +6,14 @@ PyIFT is a Python wrapper of a fork the [LIDS](http://lids.ic.unicamp.br/) C lib
 
 Its main feature is fast shortest-path algorithms in image grids and sparse graphs to perform the image foresting transform operators.
 
+## Installation
+
+Install PyIFT via pip.
+
+```sh
+pip install pyift
+```
+
 ## Acknowledgements
 
 The development of this library was initially supported by FAPESP (2018/08951-8 and 2016/21591-5).
