@@ -68,5 +68,6 @@ docs/_build/
 # JetBrains
 .idea
 
-# pytest
+# Unit testing
 .pytest_cache
+.coverage
