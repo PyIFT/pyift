@@ -1,0 +1,5 @@
+# Documentation: https://docs.codecov.io/docs/codecov-yaml
+
+comment:
+  require_changes: true
+  layout: "header, diff"
