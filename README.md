@@ -1,5 +1,9 @@
 # PyIFT
 
+[![Build Status](https://api.travis-ci.org/PyIFT/pyift.svg?branch=master)](https://travis-ci.com/github/PyIFT/pyift)
+[![codecov](https://codecov.io/gh/PyIFT/pyift/branch/master/graph/badge.svg)](https://codecov.io/gh/PyIFT/pyift)
+[![Documentation Status](https://readthedocs.org/projects/pyift/badge/?version=latest)](https://pyift.readthedocs.io/en/latest)
+
 ## Python Image Foresting Transform Library
 
 PyIFT is a Python wrapper of a fork the [LIDS](http://lids.ic.unicamp.br/) C library.
@@ -32,4 +36,3 @@ The development of this library was initially supported by FAPESP (2018/08951-8 
   publisher={IEEE}
 }
 ```
-
