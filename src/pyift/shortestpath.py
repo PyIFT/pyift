@@ -75,7 +75,7 @@ def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, grap
 
     if image is None and graph is None:
         raise ValueError('`image` or `graph` must be provided.')
-    
+
     if image is not None and graph is not None:
         raise ValueError('`image` and `graph` present, only one must be provided.')
 
@@ -94,17 +94,17 @@ def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, grap
 
         elif image.ndim == 3 and image_3d:
             image = np.expand_dims(image, 3)
-        
+
         if image.shape[:-1] != seeds.shape:
             raise ValueError('`image` grid and `seeds` must have the same dimensions, %r and %r found.' %
                              (image.shape[:-1], seeds.shape))
-        
+
         return _pyift.seed_competition_grid(image, seeds)
 
     # graph is provided
     if not isinstance(graph, sparse.csr_matrix):
         raise ValueError('`graph` must be a `csr_matrix`')
-        
+
     if graph.shape[0] != graph.shape[1]:
         raise ValueError('`graph` must be a square adjacency matrix, current shape %r' % graph.shape)
 
