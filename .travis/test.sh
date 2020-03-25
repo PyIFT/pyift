@@ -2,4 +2,4 @@
 
 set -e
 
-python -m pytest --cov
+python3 -m pytest --cov

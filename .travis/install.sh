@@ -2,10 +2,10 @@
 
 set -e
 
-pip install pytest
-pip install codecov
-pip install pytest-cov
-pip install numpy
-pip install scipy
+pip3 install pytest
+pip3 install codecov
+pip3 install pytest-cov
+pip3 install numpy
+pip3 install scipy
 
-python setup.py install
+python3 setup.py install
