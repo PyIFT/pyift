@@ -39,6 +39,7 @@ Heap *createHeap(int size, double *values)
 void destroyHeap(Heap **heap_address)
 {
     Heap *heap = *heap_address;
+    if (!heap) return;
     free(heap->nodes);
     free(heap->pos);
     free(heap->colors);
