@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import sparse
 import _pyift
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 
 
 def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, graph: Optional[sparse.csr_matrix] = None,
@@ -116,3 +116,72 @@ def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, grap
                          (graph.shape[0], seeds.shape[0]))
 
     return _pyift.seed_competition_graph(graph.data, graph.indices, graph.indptr, seeds)
+
+
+def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = False
+                       ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, Dict[Tuple, np.ndarray]]:
+    """
+    Performs the image foresting transform classification from the `seeds` nodes with dynamic arc-weights [1]_.
+
+    Parameters
+    ----------
+    seeds : array_like
+        Positive values are the labels and shortest path sources,
+        non-positives are ignored.
+    image : array_like, optional
+        Image data, seed competition is performed in the image grid graph.
+    image_3d : bool, optional
+        Indicates if it is a 3D image or a 2D image with multiple bands,
+        by default 'False'
+
+
+    Returns
+    -------
+    array_like, array_like, array_like, array_like, dict
+        Image foresting transform costs, roots, predecessors, labels maps and a dictionary
+        containing the average and size of each optimum-path tree.
+
+    Examples
+    --------
+
+    >>> import numpy as np
+    >>> from pyift.shortestpath import dynamic_arc_weight
+    >>>
+    >>> seeds = np.array([[1, 0, 0],
+    >>>                   [0, 0, 0],
+    >>>                   [0, 2, 0]])
+    >>> image = np.empty((3, 3, 2))
+    >>> image[:, :, 0] = np.array([[1, 2, 3],
+    >>>                            [2, 3, 4],
+    >>>                            [2, 2, 3]])
+    >>> image[:, :, 1] = np.array([[5, 6, 8],
+    >>>                            [6, 8, 9],
+    >>>                            [8, 9, 9]])
+    >>> dynamic_arc_weight(seeds, image)
+
+    References
+    ----------
+    .. [1] Bragantini, Jordão, et al. "Graph-based image segmentation using dynamic trees."
+           Iberoamerican Congress on Pattern Recognition. Springer, Cham, 2018.
+
+    """
+    if not isinstance(image, np.ndarray):
+        raise ValueError('`image` must be a `ndarray`.')
+
+    if image.ndim < 2 or image.ndim > 4:
+        raise ValueError('`image` must be a 2, 3 or 4-dimensional array, %d found.' % image.ndim)
+
+    if image.ndim == 2:
+        if image_3d:
+            raise ValueError('2-dimensional array cannot be converted to an 3D grid.')
+        else:
+            image = np.expand_dims(image, 2)
+
+    elif image.ndim == 3 and image_3d:
+        image = np.expand_dims(image, 3)
+
+    if image.shape[:-1] != seeds.shape:
+        raise ValueError('`image` grid and `seeds` must have the same dimensions, %r and %r found.' %
+                         (image.shape[:-1], seeds.shape))
+
+    return _pyift.dynamic_arc_weight_grid(image, seeds)

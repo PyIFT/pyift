@@ -27,8 +27,18 @@ PyObject *seed_competition_graph(PyObject *self, PyObject *args)
 }
 
 
+PyObject *dynamic_arc_weight_grid(PyObject *self, PyObject *args)
+{
+    PyArrayObject *image = NULL, *seeds = NULL;
+    if (!PyArg_ParseTuple(args, "O!O!", &PyArray_Type, &image, &PyArray_Type, &seeds))
+        return NULL;
+    return _dynamicArcWeightGrid(image, seeds);
+}
+
+
 // alphabetical order
 static PyMethodDef functions[] = {
+    {"dynamic_arc_weight_grid", (PyCFunction) dynamic_arc_weight_grid, METH_VARARGS},
     {"seed_competition_grid", (PyCFunction) seed_competition_grid, METH_VARARGS},
     {"seed_competition_graph", (PyCFunction) seed_competition_graph, METH_VARARGS},
     {NULL, NULL} // sentinel

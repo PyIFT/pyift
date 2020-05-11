@@ -45,3 +45,38 @@ class TestSeedCompetition:
         np.testing.assert_equal(roots, np.array([0, 4, 0, 4, 4]))
         np.testing.assert_equal(preds, np.array([-1, 4, 0, 4, -1]))
         np.testing.assert_equal(labels, np.array([1, 2, 1, 2, 2]))
+
+    def test_dynamic_arc_weight_grid(self):
+        seeds = np.array([[1, 0, 0],
+                          [0, 0, 0],
+                          [0, 2, 0]])
+        image = np.empty((3, 3, 2))
+        image[:, :, 0] = np.array([[1, 2, 3],
+                                   [2, 3, 4],
+                                   [2, 2, 3]])
+        image[:, :, 1] = np.array([[5, 6, 8],
+                                   [6, 8, 9],
+                                   [8, 9, 9]])
+        costs, roots, preds, labels, trees = sp.dynamic_arc_weight(seeds, image)
+
+        sqrt2 = np.sqrt(2.0)
+        np.testing.assert_equal(costs, np.array([[0,     sqrt2, 1.5],
+                                                 [sqrt2, sqrt2, 1.5],
+                                                 [1,         0,   1]]))
+        np.testing.assert_equal(roots, np.array([[0, 0, 7],
+                                                 [0, 7, 7],
+                                                 [7, 7, 7]]))
+        np.testing.assert_equal(preds, np.array([[-1, 0, 5],
+                                                 [0,  7, 8],
+                                                 [7, -1, 7]]))
+        np.testing.assert_equal(labels, np.array([[1, 1, 2],
+                                                  [1, 2, 2],
+                                                  [2, 2, 2]]))
+
+        expected_trees = {(0, 0): (3, np.array([5/3, 17/3])),
+                          (2, 1): (6, np.array([17/6, 8.5]))}
+        np.testing.assert_(expected_trees.keys() == trees.keys())
+
+        for e_tree, tree in zip(expected_trees.values(), trees.values()):
+            np.testing.assert_(e_tree[0] == tree[0])
+            np.testing.assert_allclose(e_tree[1], tree[1])
