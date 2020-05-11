@@ -23,7 +23,7 @@ def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, grap
         mutual exclusive with `image`.
     image_3d : bool, optional
         Indicates if it is a 3D image or a 2D image with multiple bands,
-        by default 'True'
+        by default 'False'
 
 
     Returns
@@ -103,16 +103,16 @@ def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, grap
 
     # graph is provided
     if not isinstance(graph, sparse.csr_matrix):
-        raise ValueError('`graph` must be a `csr_matrix`')
+        raise ValueError('`graph` must be a `csr_matrix`.')
 
     if graph.shape[0] != graph.shape[1]:
-        raise ValueError('`graph` must be a square adjacency matrix, current shape %r' % graph.shape)
+        raise ValueError('`graph` must be a square adjacency matrix, current shape %r.' % graph.shape)
 
     if seeds.ndim != 1:
-        raise ValueError('`seeds` must be a 1-dimensional array, %d found' % seeds.ndim)
+        raise ValueError('`seeds` must be a 1-dimensional array, %d found.' % seeds.ndim)
 
     if seeds.shape[0] != graph.shape[0]:
-        raise ValueError('`graph` and `seeds` dimensions does not match, %d and %d found' %
+        raise ValueError('`graph` and `seeds` dimensions does not match, %d and %d found.' %
                          (graph.shape[0], seeds.shape[0]))
 
     return _pyift.seed_competition_graph(graph.data, graph.indices, graph.indptr, seeds)
