@@ -18,11 +18,10 @@ PyObject *_seedCompetitionGrid(PyArrayObject *_image, PyArrayObject *_seeds)
         return NULL;
     }
 
-    PyArrayObject *image = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _image, NPY_DOUBLE, NPY_ARRAY_CARRAY_RO);
-    if (!image) return NULL;
-
-    PyArrayObject *seeds = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _seeds, NPY_LONG, NPY_ARRAY_CARRAY_RO);
-    if (!seeds) goto err1;
+    PyArrayObject *image = NULL, *seeds = NULL;
+    image = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _image, NPY_DOUBLE, NPY_ARRAY_CARRAY_RO);
+    seeds = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _seeds, NPY_LONG, NPY_ARRAY_CARRAY_RO);
+    if (!image || !seeds) goto err1;
 
     Coord shape;
     Adjacency *adj = NULL;
@@ -44,21 +43,17 @@ PyObject *_seedCompetitionGrid(PyArrayObject *_image, PyArrayObject *_seeds)
         goto err2;
     }
 
-    if (!adj) goto err3;
+    if (!adj) goto err2;
 
     int size = shape.x * shape.y * shape.z;
-    
-    PyArrayObject *costs = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_DOUBLE);
-    if (!costs) goto err4;
 
-    PyArrayObject *roots = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_LONG);
-    if (!roots) goto err5;
-    
-    PyArrayObject *preds = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_LONG);
-    if (!preds) goto err6;
+    PyArrayObject *costs = NULL, *roots = NULL, *preds = NULL, *labels = NULL;
 
-    PyArrayObject *labels = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_LONG);
-    if (!labels) goto err7;
+    costs = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_DOUBLE);
+    roots = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_LONG);
+    preds = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_LONG);
+    labels = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_LONG);
+    if (!costs || !roots || !preds || !labels) goto err3;
 
     double *image_ptr = PyArray_DATA(image);
     long *seeds_ptr = PyArray_DATA(seeds);
@@ -68,7 +63,7 @@ PyObject *_seedCompetitionGrid(PyArrayObject *_image, PyArrayObject *_seeds)
     long *labels_ptr = PyArray_DATA(labels);
     
     Heap *heap = createHeap(size, costs_ptr);
-    if (!heap) goto err8;
+    if (!heap) goto err3;
 
     for (int i = 0; i < size; i++)
     {
@@ -127,14 +122,17 @@ PyObject *_seedCompetitionGrid(PyArrayObject *_image, PyArrayObject *_seeds)
     return Py_BuildValue("(NNNN)", costs, roots, preds, labels);
 
     // error handling
-    err8: Py_DECREF(labels);
-    err7: Py_DECREF(preds);
-    err6: Py_DECREF(roots);
-    err5: Py_DECREF(costs);
-    err4: destroyAdjacency(&adj);
-    err3: PyErr_NoMemory();
-    err2: Py_DECREF(seeds);
-    err1: Py_DECREF(image);
+    err3:
+    Py_XDECREF(labels);
+    Py_XDECREF(preds);
+    Py_XDECREF(roots);
+    Py_XDECREF(costs);
+    err2:
+    destroyAdjacency(&adj);
+    PyErr_NoMemory();
+    err1:
+    Py_XDECREF(seeds);
+    Py_XDECREF(image);
     return NULL;
 }
 
@@ -156,29 +154,19 @@ PyObject *_seedCompetitionGraph(PyArrayObject *_weights, PyArrayObject *_indices
         return NULL;
     }
 
-    PyArrayObject *weights = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _weights, NPY_DOUBLE, NPY_ARRAY_CARRAY_RO);
-    if (!weights) return NULL;
+    PyArrayObject *weights = NULL, *indices = NULL, *indptr = NULL, *seeds = NULL;
+    weights = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _weights, NPY_DOUBLE, NPY_ARRAY_CARRAY_RO);
+    indices = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _indices, NPY_LONG, NPY_ARRAY_CARRAY_RO);
+    indptr = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _indptr, NPY_LONG, NPY_ARRAY_CARRAY_RO);
+    seeds = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _seeds, NPY_LONG, NPY_ARRAY_CARRAY_RO);
+    if (!weights || !indices || !indptr || !seeds) goto err1;
 
-    PyArrayObject *indices = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _indices, NPY_LONG, NPY_ARRAY_CARRAY_RO);
-    if (!indices) goto err1;
-
-    PyArrayObject *indptr = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _indptr, NPY_LONG, NPY_ARRAY_CARRAY_RO);
-    if (!indptr) goto err2;
-
-    PyArrayObject *seeds = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _seeds, NPY_LONG, NPY_ARRAY_CARRAY_RO);
-    if (!seeds) goto err3;
-
-    PyArrayObject *costs = (PyArrayObject*) PyArray_SimpleNew(1, PyArray_DIMS(seeds), NPY_DOUBLE);
-    if (!costs) goto err4;
-
-    PyArrayObject *roots = (PyArrayObject*) PyArray_SimpleNew(1, PyArray_DIMS(seeds), NPY_LONG);
-    if (!roots) goto err5;
-    
-    PyArrayObject *preds = (PyArrayObject*) PyArray_SimpleNew(1, PyArray_DIMS(seeds), NPY_LONG);
-    if (!preds) goto err6;
-
-    PyArrayObject *labels = (PyArrayObject*) PyArray_SimpleNew(1, PyArray_DIMS(seeds), NPY_LONG);
-    if (!labels) goto err7;
+    PyArrayObject *costs = NULL, *roots = NULL, *preds = NULL, *labels = NULL;
+    roots = (PyArrayObject*) PyArray_SimpleNew(1, PyArray_DIMS(seeds), NPY_LONG);
+    costs = (PyArrayObject*) PyArray_SimpleNew(1, PyArray_DIMS(seeds), NPY_DOUBLE);
+    preds = (PyArrayObject*) PyArray_SimpleNew(1, PyArray_DIMS(seeds), NPY_LONG);
+    labels = (PyArrayObject*) PyArray_SimpleNew(1, PyArray_DIMS(seeds), NPY_LONG);
+    if (!roots || !costs || !preds || !labels) goto err2;
 
     double *weights_ptr = PyArray_DATA(weights);
     long *indices_ptr = PyArray_DATA(indices);
@@ -191,7 +179,7 @@ PyObject *_seedCompetitionGraph(PyArrayObject *_weights, PyArrayObject *_indices
     
     long size = PyArray_DIM(seeds, 0);
     Heap *heap = createHeap(size, costs_ptr);
-    if (!heap) goto err8;
+    if (!heap) goto err2;
 
     for (int i = 0; i < size; i++)
     {
@@ -240,15 +228,17 @@ PyObject *_seedCompetitionGraph(PyArrayObject *_weights, PyArrayObject *_indices
     return Py_BuildValue("(NNNN)", costs, roots, preds, labels);
 
     // error handling
-    err8: Py_DECREF(labels);
-    err7: Py_DECREF(preds);
-    err6: Py_DECREF(roots);
-    err5: Py_DECREF(costs);
-    err4: PyErr_NoMemory();
-          Py_DECREF(seeds);
-    err3: Py_DECREF(indptr);
-    err2: Py_DECREF(indices);
-    err1: Py_DECREF(weights);
+    err2:
+    PyErr_NoMemory();
+    Py_XDECREF(labels);
+    Py_XDECREF(preds);
+    Py_XDECREF(roots);
+    Py_XDECREF(costs);
+    err1:
+    Py_XDECREF(seeds);
+    Py_XDECREF(indptr);
+    Py_XDECREF(indices);
+    Py_XDECREF(weights);
     return NULL;
 }
 

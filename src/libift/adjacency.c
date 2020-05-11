@@ -6,6 +6,7 @@
 void destroyAdjacency(Adjacency **adj_address)
 {
     Adjacency *adj = *adj_address;
+    if (!adj) return;
     free(adj->dx);
     free(adj->dy);
     free(adj->dz);
