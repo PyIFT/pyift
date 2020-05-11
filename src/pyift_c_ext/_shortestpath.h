@@ -18,6 +18,8 @@ extern "C" {
 PyObject *_seedCompetitionGrid(PyArrayObject *image, PyArrayObject *seeds);
 PyObject *_seedCompetitionGraph(PyArrayObject *data, PyArrayObject *indices, PyArrayObject *indptr, PyArrayObject *seeds);
 
+PyObject *_dynamicArcWeightGrid(PyArrayObject *image, PyArrayObject *seeds);
+
 
 #ifdef __cplusplus
 }
