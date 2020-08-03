@@ -21,6 +21,8 @@ typedef struct ift_adjacency
 void destroyAdjacency(Adjacency **adj_address);
 Adjacency *circularAdjacency(float radii);
 Adjacency *sphericAdjacency(float radii);
+Adjacency *leftSide(Adjacency *adj, double shift);
+Adjacency *rightSide(Adjacency *adj, double shift);
 
 
 inline Coord adjacentCoord(const Coord *coord, const Adjacency *adj, int index)
@@ -30,7 +32,6 @@ inline Coord adjacentCoord(const Coord *coord, const Adjacency *adj, int index)
                        .z = coord->z + adj->dz[index]};
     return neighbour;
 }
-
 
 
 #ifdef __cplusplus
