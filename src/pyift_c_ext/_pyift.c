@@ -64,6 +64,7 @@ PyObject *seed_competition_graph(PyObject *self, PyObject *args)
 }
 
 
+
 PyObject *seed_competition_grid(PyObject *self, PyObject *args)
 {
     PyArrayObject *image = NULL, *seeds = NULL;
