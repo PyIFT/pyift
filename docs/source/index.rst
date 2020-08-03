@@ -3,9 +3,16 @@ Welcome to pyift's documentation!
 
 .. toctree::
     :maxdepth: 2
-    :caption: API References
+
+    readme
+
+API References
+==============
+
+.. toctree::
 
     shortestpath
+    livewire
 
 
 Indices and tables

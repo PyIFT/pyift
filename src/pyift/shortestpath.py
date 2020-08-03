@@ -121,7 +121,7 @@ def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, grap
 def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = False
                        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, Dict[Tuple, np.ndarray]]:
     """
-    Performs the image foresting transform classification from the `seeds` nodes with dynamic arc-weights [1]_.
+    Performs the image foresting transform classification from the `seeds` nodes with dynamic arc-weights [2]_.
 
     Parameters
     ----------
@@ -161,7 +161,7 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
 
     References
     ----------
-    .. [1] Bragantini, Jordão, et al. "Graph-based image segmentation using dynamic trees."
+    .. [2] Bragantini, Jordão, et al. "Graph-based image segmentation using dynamic trees."
            Iberoamerican Congress on Pattern Recognition. Springer, Cham, 2018.
 
     """
