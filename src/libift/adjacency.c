@@ -1,6 +1,8 @@
 #include "adjacency.h"
 #include "sort.h"
 #include <stdlib.h>
+#include <math.h>
+#include <float.h>
 
 
 void destroyAdjacency(Adjacency **adj_address)
@@ -153,4 +155,50 @@ Adjacency *sphericAdjacency(float radii)
     free(sq_dists);
     destroyAdjacency(&adj);
     return sorted;
+}
+
+
+Adjacency *leftSide(Adjacency *adj, double shift)
+{
+    for (int i = 0; i < adj->size; i++)
+        if (adj->dz[i] != 0)
+            return NULL;
+
+    Adjacency *left = _createAdjacency(adj->size);
+    if (!left) return NULL;
+
+    for (int i = 0; i < left->size; i++)
+    {
+        left->dx[i] = left->dy[i] = left->dz[i] = 0;
+        double length = sqrt(adj->dx[i] * adj->dx[i] + adj->dy[i] * adj->dy[i]);
+        if (length >=  FLT_EPSILON) {
+            left->dx[i] = round((adj->dx[i] / 2.0 + adj->dy[i] / length) * shift);
+            left->dy[i] = round((adj->dy[i] / 2.0 - adj->dx[i] / length) * shift);
+        }
+    }
+
+    return left;
+}
+
+
+Adjacency *rightSide(Adjacency *adj, double shift)
+{
+    for (int i = 0; i < adj->size; i++)
+        if (adj->dz[i] != 0)
+            return NULL;
+
+    Adjacency *right = _createAdjacency(adj->size);
+    if (!right) return NULL;
+
+    for (int i = 0; i < right->size; i++)
+    {
+        right->dx[i] = right->dy[i] = right->dz[i] = 0;
+        double length = sqrt(adj->dx[i] * adj->dx[i] + adj->dy[i] * adj->dy[i]);
+        if (length >=  FLT_EPSILON) {
+            right->dx[i] = round((adj->dx[i] / 2.0 - adj->dy[i] / length) * shift);
+            right->dy[i] = round((adj->dy[i] / 2.0 + adj->dx[i] / length) * shift);
+        }
+    }
+
+    return right;
 }
