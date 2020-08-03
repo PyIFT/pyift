@@ -159,7 +159,7 @@ class LiveWire:
             path = _pyift.livewire_path(self.image, self.saliency, self.costs, self.preds, self.labels,
                                         self.arc_fun, self.sigma, self.gamma, src, dst)
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
         return path
 

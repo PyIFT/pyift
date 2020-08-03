@@ -122,7 +122,7 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
                        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, Dict[Tuple, np.ndarray]]:
     """
     Performs the image foresting transform classification from the `seeds` nodes with dynamic arc-weights [2]_.
-    
+
     Parameters
     ----------
     seeds : array_like
