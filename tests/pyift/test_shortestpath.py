@@ -4,19 +4,16 @@ from pyift import shortestpath as sp
 
 
 class TestSeedCompetition:
+    seeds = np.array([[1, 0, 0],
+                      [0, 0, 0],
+                      [0, 2, 0]])
+
+    image = np.array([[[1, 5], [2, 6], [3, 8]],
+                      [[2, 6], [3, 8], [4, 9]],
+                      [[2, 8], [2, 9], [3, 9]]])
 
     def test_seed_competition_grid(self):
-        seeds = np.array([[1, 0, 0],
-                          [0, 0, 0],
-                          [0, 2, 0]])
-        image = np.empty((3, 3, 2))
-        image[:, :, 0] = np.array([[1, 2, 3],
-                                   [2, 3, 4],
-                                   [2, 2, 3]])
-        image[:, :, 1] = np.array([[5, 6, 8],
-                                   [6, 8, 9],
-                                   [8, 9, 9]])
-        costs, roots, preds, labels = sp.seed_competition(seeds, image=image)
+        costs, roots, preds, labels = sp.seed_competition(self.seeds, image=self.image)
 
         sqrt2 = np.sqrt(2.0)
         np.testing.assert_equal(costs, np.array([[0,     sqrt2, sqrt2],
@@ -46,18 +43,31 @@ class TestSeedCompetition:
         np.testing.assert_equal(preds, np.array([-1, 4, 0, 4, -1]))
         np.testing.assert_equal(labels, np.array([1, 2, 1, 2, 2]))
 
+    def test_error_handling(self):
+        with np.testing.assert_raises(TypeError):
+            sp.seed_competition(self.seeds, image=0)
+
+        with np.testing.assert_raises(TypeError):
+            sp.seed_competition(self.seeds.flatten(), graph=0)
+
+        with np.testing.assert_raises(TypeError):
+            sp.dynamic_arc_weight(self.seeds, image=0)
+
+        with np.testing.assert_raises(ValueError):
+            sp.seed_competition(self.seeds, np.ones(self.seeds.size))
+
+        with np.testing.assert_raises(ValueError):
+            sp.dynamic_arc_weight(self.seeds, np.ones(self.seeds.size))
+
+        with np.testing.assert_raises(ValueError):
+            sp.seed_competition(self.seeds)
+
+        with np.testing.assert_raises(ValueError):
+            sp.seed_competition(self.seeds, image=self.image,
+                                graph=csgraph.csgraph_from_dense(self.image))
+
     def test_dynamic_arc_weight_grid(self):
-        seeds = np.array([[1, 0, 0],
-                          [0, 0, 0],
-                          [0, 2, 0]])
-        image = np.empty((3, 3, 2))
-        image[:, :, 0] = np.array([[1, 2, 3],
-                                   [2, 3, 4],
-                                   [2, 2, 3]])
-        image[:, :, 1] = np.array([[5, 6, 8],
-                                   [6, 8, 9],
-                                   [8, 9, 9]])
-        costs, roots, preds, labels, trees = sp.dynamic_arc_weight(seeds, image)
+        costs, roots, preds, labels, trees = sp.dynamic_arc_weight(self.seeds, self.image)
 
         sqrt2 = np.sqrt(2.0)
         np.testing.assert_equal(costs, np.array([[0,     sqrt2, 1.5],

@@ -81,7 +81,7 @@ def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, grap
 
     if image is not None:
         if not isinstance(image, np.ndarray):
-            raise ValueError('`image` must be a `ndarray`.')
+            raise TypeError('`image` must be a `ndarray`.')
 
         if image.ndim < 2 or image.ndim > 4:
             raise ValueError('`image` must be a 2, 3 or 4-dimensional array, %d found.' % image.ndim)
@@ -103,7 +103,7 @@ def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, grap
 
     # graph is provided
     if not isinstance(graph, sparse.csr_matrix):
-        raise ValueError('`graph` must be a `csr_matrix`.')
+        raise TypeError('`graph` must be a `csr_matrix`.')
 
     if graph.shape[0] != graph.shape[1]:
         raise ValueError('`graph` must be a square adjacency matrix, current shape %r.' % graph.shape)
@@ -166,7 +166,7 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
 
     """
     if not isinstance(image, np.ndarray):
-        raise ValueError('`image` must be a `ndarray`.')
+        raise TypeError('`image` must be a `ndarray`.')
 
     if image.ndim < 2 or image.ndim > 4:
         raise ValueError('`image` must be a 2, 3 or 4-dimensional array, %d found.' % image.ndim)
