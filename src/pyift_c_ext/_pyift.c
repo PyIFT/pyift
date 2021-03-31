@@ -9,12 +9,22 @@
 #include "_shortestpath.h"
 
 
-PyObject *dynamic_arc_weight_grid(PyObject *self, PyObject *args)
+PyObject *dynamic_arc_weight_grid_exp_decay(PyObject *self, PyObject *args)
+{
+    PyArrayObject *image = NULL, *seeds = NULL;
+    double alpha = 0;
+    if (!PyArg_ParseTuple(args, "O!O!d", &PyArray_Type, &image, &PyArray_Type, &seeds, &alpha))
+        return NULL;
+    return _dynamicArcWeightGridExpDecay(image, seeds, alpha);
+}
+
+
+PyObject *dynamic_arc_weight_grid_root(PyObject *self, PyObject *args)
 {
     PyArrayObject *image = NULL, *seeds = NULL;
     if (!PyArg_ParseTuple(args, "O!O!", &PyArray_Type, &image, &PyArray_Type, &seeds))
         return NULL;
-    return _dynamicArcWeightGrid(image, seeds);
+    return _dynamicArcWeightGridRoot(image, seeds);
 }
 
 
@@ -76,7 +86,8 @@ PyObject *seed_competition_grid(PyObject *self, PyObject *args)
 
 // alphabetical order
 static PyMethodDef functions[] = {
-    {"dynamic_arc_weight_grid", (PyCFunction) dynamic_arc_weight_grid, METH_VARARGS},
+    {"dynamic_arc_weight_grid_exp_decay", (PyCFunction) dynamic_arc_weight_grid_exp_decay, METH_VARARGS},
+    {"dynamic_arc_weight_grid_root", (PyCFunction) dynamic_arc_weight_grid_root, METH_VARARGS},
     {"livewire_path", (PyCFunction) livewire_path, METH_VARARGS},
     {"seed_competition_graph", (PyCFunction) seed_competition_graph, METH_VARARGS},
     {"seed_competition_grid", (PyCFunction) seed_competition_grid, METH_VARARGS},

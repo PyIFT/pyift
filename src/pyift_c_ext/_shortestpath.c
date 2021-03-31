@@ -254,7 +254,7 @@ static void free_double_matrix(double **matrix, int length)
 }
 
 
-PyObject *_dynamicArcWeightGrid(PyArrayObject *_image, PyArrayObject *_seeds)
+PyObject *_dynamicArcWeightGridRoot(PyArrayObject *_image, PyArrayObject *_seeds)
 {
     if (PyArray_NDIM(_image) != PyArray_NDIM(_seeds) + 1) {
         PyErr_SetString(PyExc_TypeError, "`seeds` ndarray must be one dimension lower than `image`.");
@@ -282,7 +282,7 @@ PyObject *_dynamicArcWeightGrid(PyArrayObject *_image, PyArrayObject *_seeds)
         d = PyArray_DIM(image, 3);
         adj = sphericAdjacency(1.0);
     } else {
-        PyErr_SetString(PyExc_TypeError, "`dynamicArcWeightGrid` expected input with 3 or 4 number of dimensions.");
+        PyErr_SetString(PyExc_TypeError, "`dynamicArcWeightGridRoot` expected input with 3 or 4 number of dimensions.");
         goto err1;
     }
     if (!adj) goto err2;
@@ -411,6 +411,154 @@ PyObject *_dynamicArcWeightGrid(PyArrayObject *_image, PyArrayObject *_seeds)
     Py_XDECREF(costs);
     free(tree_sizes);
     free_double_matrix(tree_avgs, size);
+    err2:
+    destroyAdjacency(&adj);
+    PyErr_NoMemory();
+    err1:
+    Py_XDECREF(seeds);
+    Py_XDECREF(image);
+    return NULL;
+}
+
+
+PyObject *_dynamicArcWeightGridExpDecay(PyArrayObject *_image, PyArrayObject *_seeds, double alpha)
+{
+    if (alpha < 0.0 || alpha > 1.0) {
+        PyErr_SetString(PyExc_TypeError, "`alpha` must be between 0 and 1.");
+        return NULL;
+    }
+
+    if (PyArray_NDIM(_image) != PyArray_NDIM(_seeds) + 1) {
+        PyErr_SetString(PyExc_TypeError, "`seeds` ndarray must be one dimension lower than `image`.");
+        return NULL;
+    }
+
+    PyArrayObject *image = NULL, *seeds = NULL;
+    image = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _image, NPY_DOUBLE, NPY_ARRAY_CARRAY_RO);
+    seeds = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _seeds, NPY_LONG, NPY_ARRAY_CARRAY_RO);
+    if (!image || !seeds) goto err1;
+
+    Coord shape;
+    Adjacency *adj = NULL;
+    int d = -1;
+    if (PyArray_NDIM(image) == 3) {
+        shape.z = 1;
+        shape.y = PyArray_DIM(image, 0);
+        shape.x = PyArray_DIM(image, 1);
+        d = PyArray_DIM(image, 2);
+        adj = circularAdjacency(1.0);
+    } else if (PyArray_NDIM(image) == 4) {
+        shape.z = PyArray_DIM(image, 0);
+        shape.y = PyArray_DIM(image, 1);
+        shape.x = PyArray_DIM(image, 2);
+        d = PyArray_DIM(image, 3);
+        adj = sphericAdjacency(1.0);
+    } else {
+        PyErr_SetString(PyExc_TypeError, "`dynamicArcWeightGridExpDecay` expected input with 3 or 4 number of dimensions.");
+        goto err1;
+    }
+    if (!adj) goto err2;
+
+    int size = shape.x * shape.y * shape.z;
+    PyArrayObject *costs = NULL, *roots = NULL, *preds = NULL, *labels = NULL, *tree_avgs = NULL;
+
+    costs = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_DOUBLE);
+    roots = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_LONG);
+    preds = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_LONG);
+    labels = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(seeds), PyArray_DIMS(seeds), NPY_LONG);
+    tree_avgs = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(image), PyArray_DIMS(image), NPY_DOUBLE);
+    if (!costs || !roots || !preds || !labels || !tree_avgs) goto err3;
+
+    double *image_ptr = PyArray_DATA(image);
+    long *seeds_ptr = PyArray_DATA(seeds);
+    double *costs_ptr = PyArray_DATA(costs);
+    long *roots_ptr = PyArray_DATA(roots);
+    long *preds_ptr = PyArray_DATA(preds);
+    long *labels_ptr = PyArray_DATA(labels);
+    double *tree_avgs_ptr = PyArray_DATA(tree_avgs);
+
+    Heap *heap = createHeap(size, costs_ptr);
+    if (!heap) goto err3;
+
+    for (int i = 0; i < size; i++)
+    {
+        roots_ptr[i] = i;
+        preds_ptr[i] = -1;
+
+        if (seeds_ptr[i] > 0) {
+            costs_ptr[i] = 0;
+            labels_ptr[i] = seeds_ptr[i];
+            insertHeap(heap, i);
+            for (int j = 0, i_stride = i * d; j < d; j++, i_stride++) {
+                tree_avgs_ptr[i_stride] = image_ptr[i_stride];
+            }
+        } else {
+            costs_ptr[i] = DBL_MAX;
+            labels_ptr[i] = -1;
+        }
+    }
+
+    while (!emptyHeap(heap))
+    {
+        int p = popHeap(heap);
+        int p_stride = p * d;
+
+        int pred = preds_ptr[p];
+        if (pred != -1)
+        {
+            int pred_stride = pred * d;
+            for (int j = 0; j < d; j++) {
+                tree_avgs_ptr[p_stride + j] = (1 - alpha) * image_ptr[p_stride + j]  +
+                              alpha * tree_avgs_ptr[pred_stride + j];
+            }
+        }
+
+        Coord u = indexToCoord(&shape, p);
+        for (int i = 1; i < adj->size; i++)
+        {
+            Coord v = adjacentCoord(&u, adj, i);
+            if (validCoord(&shape, &v))
+            {
+                int q = coordToIndex(&shape, &v);
+                if (heap->colors[q] != BLACK)
+                {
+                    int q_stride = q * d;
+                    double dist = 0;
+                    for (int j = 0; j < d; j++)
+                        dist += square(tree_avgs_ptr[p_stride + j] - image_ptr[q_stride + j]);
+                    dist = sqrt(dist);
+                    dist = PyArray_MAX(dist, costs_ptr[p]);
+                    if (dist < costs_ptr[q])
+                    {
+                        roots_ptr[q] = roots_ptr[p];
+                        labels_ptr[q] = labels_ptr[p];
+                        preds_ptr[q] = p;
+                        costs_ptr[q] = dist;
+                        if (heap->colors[q] == WHITE)
+                            insertHeap(heap, q);
+                        else
+                            goUpHeap(heap, q);
+                    }
+                }
+            }
+        }
+    }
+
+    destroyHeap(&heap);
+    destroyAdjacency(&adj);
+    Py_DECREF(seeds);
+    Py_DECREF(image);
+
+    return Py_BuildValue("(NNNNN)", costs, roots, preds, labels, tree_avgs);
+
+    // error handling
+    err4: destroyHeap(&heap);
+    err3:
+    Py_XDECREF(labels);
+    Py_XDECREF(preds);
+    Py_XDECREF(roots);
+    Py_XDECREF(costs);
+    Py_XDECREF(tree_avgs);
     err2:
     destroyAdjacency(&adj);
     PyErr_NoMemory();
