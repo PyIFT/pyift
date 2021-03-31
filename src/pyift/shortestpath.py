@@ -201,4 +201,3 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
         return _pyift.dynamic_arc_weight_grid_root(image, seeds)
     else:
         raise NotImplementedError
-
