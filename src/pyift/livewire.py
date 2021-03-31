@@ -102,7 +102,7 @@ class LiveWire:
             if saliency.shape[:2] != image.shape[:2]:
                 raise ValueError('`saliency` and `image` 0,1-dimensions must match.')
 
-            self.saliency = np.ascontiguousarray(saliency.astype(np.float))
+            self.saliency = np.ascontiguousarray(saliency.astype(float))
 
         arc_functions = ('exp', 'exp-saliency')
         if arc_fun.lower() not in arc_functions:
@@ -125,10 +125,10 @@ class LiveWire:
             self.gamma = kwargs.pop('gamma', gamma)
 
         self.size = image.shape[:2]
-        self.image = np.ascontiguousarray(image.astype(np.float))
-        self.costs = np.full(self.size, np.finfo('d').max, dtype=np.float)
-        self.preds = np.full(self.size, -1, dtype=np.int)
-        self.labels = np.zeros(self.size, dtype=np.bool)
+        self.image = np.ascontiguousarray(image.astype(float))
+        self.costs = np.full(self.size, np.finfo('d').max, dtype=float)
+        self.preds = np.full(self.size, -1, dtype=int)
+        self.labels = np.zeros(self.size, dtype=bool)
 
         self.source = -1
         self.destiny = -1
