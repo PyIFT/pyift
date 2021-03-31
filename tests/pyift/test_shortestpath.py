@@ -78,7 +78,7 @@ class TestSeedCompetition:
         sqrt2 = np.sqrt(2.0)
         np.testing.assert_equal(costs, np.array([[0,     sqrt2, 1.5],
                                                  [sqrt2, sqrt2, 1.5],
-                                                 [1,         0, 1  ]]))
+                                                 [1,         0, 1]]))
         np.testing.assert_equal(roots, np.array([[0, 0, 7],
                                                  [0, 7, 7],
                                                  [7, 7, 7]]))
