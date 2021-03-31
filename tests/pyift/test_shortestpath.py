@@ -66,7 +66,33 @@ class TestSeedCompetition:
             sp.seed_competition(self.seeds, image=self.image,
                                 graph=csgraph.csgraph_from_dense(self.image))
 
-    def test_dynamic_arc_weight_grid(self):
+        with np.testing.assert_raises(ValueError):
+            sp.dynamic_arc_weight(self.seeds, self.image, alpha=-1.0)
+
+        with np.testing.assert_raises(ValueError):
+            sp.dynamic_arc_weight(self.seeds, self.image, mode='fake')
+
+    def test_dynamic_arc_weight_grid_exp_decay(self):
+        costs, roots, preds, labels, avgs = sp.dynamic_arc_weight(self.seeds, self.image, mode='exp')
+
+        sqrt2 = np.sqrt(2.0)
+        np.testing.assert_equal(costs, np.array([[0,     sqrt2, 1.5],
+                                                 [sqrt2, sqrt2, 1.5],
+                                                 [1,         0, 1  ]]))
+        np.testing.assert_equal(roots, np.array([[0, 0, 7],
+                                                 [0, 7, 7],
+                                                 [7, 7, 7]]))
+        np.testing.assert_equal(preds, np.array([[-1, 0, 5],
+                                                 [0,  7, 8],
+                                                 [7, -1, 7]]))
+        np.testing.assert_equal(labels, np.array([[1, 1, 2],
+                                                  [1, 2, 2],
+                                                  [2, 2, 2]]))
+        np.testing.assert_equal(avgs, np.array([[[1,     5], [1.5, 5.5], [3.125, 8.5]],
+                                                [[1.5, 5.5], [2.5, 8.5], [3.25,  9]],
+                                                [[2,   8.5], [2,   9],   [2.5,   9]]]))
+
+    def test_dynamic_arc_weight_grid_root(self):
         costs, roots, preds, labels, trees = sp.dynamic_arc_weight(self.seeds, self.image)
 
         sqrt2 = np.sqrt(2.0)

@@ -118,7 +118,8 @@ def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, grap
     return _pyift.seed_competition_graph(graph.data, graph.indices, graph.indptr, seeds)
 
 
-def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = False
+def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = False,
+                       mode: str = 'root', alpha: float = 0.5
                        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, Dict[Tuple, np.ndarray]]:
     """
     Performs the image foresting transform classification from the `seeds` nodes with dynamic arc-weights [2]_.
@@ -132,12 +133,16 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
         Image data, seed competition is performed in the image grid graph.
     image_3d : bool, optional
         Indicates if it is a 3D image or a 2D image with multiple bands,
-        by default 'False'
-
+        by default 'False'.
+    mode : {'root', 'exp'}, default='root'
+        Indicates the average computation policy.
+    alpha : float, optional
+        Parameter of weight decay for exponential averaging, only valid
+        when `mode` == 'exp'.
 
     Returns
     -------
-    array_like, array_like, array_like, array_like, dict
+    array_like, array_like, array_like, array_like, Union[array_like, dict]
         Image foresting transform costs, roots, predecessors, labels maps and a dictionary
         containing the average and size of each optimum-path tree.
 
@@ -165,11 +170,18 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
            Iberoamerican Congress on Pattern Recognition. Springer, Cham, 2018.
 
     """
+    allowed_modes = ('exp', 'root')
+    if mode not in allowed_modes:
+        raise ValueError('`mode` must belong to %r' % (allowed_modes, ))
+
     if not isinstance(image, np.ndarray):
         raise TypeError('`image` must be a `ndarray`.')
 
     if image.ndim < 2 or image.ndim > 4:
         raise ValueError('`image` must be a 2, 3 or 4-dimensional array, %d found.' % image.ndim)
+
+    if alpha < 0 or alpha > 1:
+        raise ValueError('`alpha` must be between 0 and 1')
 
     if image.ndim == 2:
         if image_3d:
@@ -183,5 +195,10 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
     if image.shape[:-1] != seeds.shape:
         raise ValueError('`image` grid and `seeds` must have the same dimensions, %r and %r found.' %
                          (image.shape[:-1], seeds.shape))
+    if mode == 'exp':
+        return _pyift.dynamic_arc_weight_grid_exp_decay(image, seeds, alpha)
+    elif mode == 'root':
+        return _pyift.dynamic_arc_weight_grid_root(image, seeds)
+    else:
+        raise NotImplementedError
 
-    return _pyift.dynamic_arc_weight_grid(image, seeds)
