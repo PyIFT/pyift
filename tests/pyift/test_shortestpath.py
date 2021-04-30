@@ -116,3 +116,21 @@ class TestSeedCompetition:
         for e_tree, tree in zip(expected_trees.values(), trees.values()):
             np.testing.assert_(e_tree[0] == tree[0])
             np.testing.assert_allclose(e_tree[1], tree[1])
+
+    def test_distance_transform_edt(self):
+        mask = np.array([[0, 0, 0, 0, 0, 0],
+                         [0, 1, 0, 1, 0, 0],
+                         [0, 1, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 1, 0],
+                         [0, 1, 1, 0, 1, 0],
+                         [0, 0, 0, 0, 0, 0]], dtype=bool)
+
+        expected_dist = np.array([[0, 0, 0,          0,          0, 0],
+                                  [0, 1, 0,          1,          0, 0],
+                                  [0, 1, 1,          np.sqrt(2), 1, 0],
+                                  [0, 1, np.sqrt(2), 1,          1, 0],
+                                  [0, 1, 1,          0,          1, 0],
+                                  [0, 0, 0,          0,          0, 0]])
+
+        distance = sp.distance_transform_edt(mask)
+        np.testing.assert_equal(distance, expected_dist)

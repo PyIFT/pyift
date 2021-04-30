@@ -9,6 +9,15 @@
 #include "_shortestpath.h"
 
 
+PyObject *euclidean_distance_transform_grid(PyObject *self, PyObject *args)
+{
+    PyArrayObject *mask = NULL, *scales = NULL;
+    if (!PyArg_ParseTuple(args, "O!O!", &PyArray_Type, &mask, &PyArray_Type, &scales))
+        return NULL;
+    return _euclideanDistanceTransformGrid(mask, scales);
+}
+
+
 PyObject *dynamic_arc_weight_grid_exp_decay(PyObject *self, PyObject *args)
 {
     PyArrayObject *image = NULL, *seeds = NULL;
@@ -86,6 +95,7 @@ PyObject *seed_competition_grid(PyObject *self, PyObject *args)
 
 // alphabetical order
 static PyMethodDef functions[] = {
+    {"euclidean_distance_transform_grid", (PyCFunction) euclidean_distance_transform_grid, METH_VARARGS},
     {"dynamic_arc_weight_grid_exp_decay", (PyCFunction) dynamic_arc_weight_grid_exp_decay, METH_VARARGS},
     {"dynamic_arc_weight_grid_root", (PyCFunction) dynamic_arc_weight_grid_root, METH_VARARGS},
     {"livewire_path", (PyCFunction) livewire_path, METH_VARARGS},

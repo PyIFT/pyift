@@ -596,7 +596,7 @@ PyObject *_dynamicArcWeightGridExpDecay(PyArrayObject *_image, PyArrayObject *_s
     double *tree_avgs_ptr = PyArray_DATA(tree_avgs);
 
     Heap *heap = createHeap(size, costs_ptr);
-    if (!heap) goto err3;
+    if (!heap) goto err4;
 
     for (int i = 0; i < size; i++)
     {
@@ -683,5 +683,135 @@ PyObject *_dynamicArcWeightGridExpDecay(PyArrayObject *_image, PyArrayObject *_s
     err1:
     Py_XDECREF(seeds);
     Py_XDECREF(image);
+    return NULL;
+}
+
+
+PyObject *_euclideanDistanceTransformGrid(PyArrayObject *_mask, PyArrayObject *_scales)
+{
+    if (PyArray_NDIM(_scales) != 1) {
+        PyErr_SetString(PyExc_TypeError, "`scales` ndarray must be one dimensional.");
+        return NULL;
+    }
+
+    if (3 != PyArray_DIM(_scales, 0)) {
+        PyErr_SetString(PyExc_TypeError, "`scales` size must be 3.");
+        return NULL;
+    }
+
+    PyArrayObject *mask = NULL, *scales = NULL;
+    mask = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _mask, NPY_BOOL, NPY_ARRAY_CARRAY_RO);
+    scales = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _scales, NPY_DOUBLE, NPY_ARRAY_CARRAY_RO);
+    if (!mask || !scales) goto err1;
+
+    Coord shape;
+    Adjacency *adj = NULL;
+    if (PyArray_NDIM(mask) == 2) {
+        shape.z = 1;
+        shape.y = PyArray_DIM(mask, 0);
+        shape.x = PyArray_DIM(mask, 1);
+        adj = circularAdjacency(1.42);
+    } else if (PyArray_NDIM(mask) == 3) {
+        shape.z = PyArray_DIM(mask, 0);
+        shape.y = PyArray_DIM(mask, 1);
+        shape.x = PyArray_DIM(mask, 2);
+        adj = sphericAdjacency(1.75);
+    } else {
+        PyErr_SetString(PyExc_TypeError, "`seedCompetitionGrid` expected input with 3 or 4 number of dimensions.");
+        goto err2;
+    }
+
+    if (!adj) goto err2;
+
+    int size = shape.x * shape.y * shape.z;
+
+    PyArrayObject *costs = NULL, *roots = NULL;
+
+    costs = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(mask), PyArray_DIMS(mask), NPY_DOUBLE);
+    roots = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(mask), PyArray_DIMS(mask), NPY_LONG);
+    if (!costs || !roots) goto err3;
+
+    bool *mask_ptr = PyArray_DATA(mask);
+    double *costs_ptr = PyArray_DATA(costs);
+    long *roots_ptr = PyArray_DATA(roots);
+    double *scales_ptr = PyArray_DATA(scales);
+
+    double sq_scales[3];
+    for (int i = 0; i < 3; i++)
+        sq_scales[i] = square(scales_ptr[i]);
+
+    Heap *heap = createHeap(size, costs_ptr);
+    if (!heap) goto err3;
+
+    for (int p = 0; p < size; p++)
+    {
+        roots_ptr[p] = p;
+        if (!mask_ptr[p]) {
+            costs_ptr[p] = 0;
+            Coord u = indexToCoord(&shape, p);
+            for (int i = 1; i < adj->size; i++)
+            {
+                Coord v = adjacentCoord(&u, adj, i);
+                if (validCoord(&shape, &v)) {
+                    int q = coordToIndex(&shape, &v);
+                    if (mask_ptr[q]) {
+                        insertHeap(heap, p);
+                        break;
+                    }
+                }
+            }
+        } else {
+            costs_ptr[p] = DBL_MAX;
+        }
+    }
+
+    while (!emptyHeap(heap))
+    {
+        int p = popHeap(heap);
+        Coord u = indexToCoord(&shape, p);
+        for (int i = 1; i < adj->size; i++)
+        {
+            Coord v = adjacentCoord(&u, adj, i);
+            if (validCoord(&shape, &v))
+            {
+                int q = coordToIndex(&shape, &v);
+                if (mask_ptr[q] && heap->colors[q] != BLACK)
+                {
+                    Coord r = indexToCoord(&shape, roots_ptr[p]);
+                    double dist = sq_scales[0] * square(r.z - v.z) +
+                                  sq_scales[1] * square(r.y - v.y) +
+                                  sq_scales[2] * square(r.x - v.x);
+                    dist = sqrt(dist);
+                    if (dist < costs_ptr[q])
+                    {
+                        roots_ptr[q] = roots_ptr[p];
+                        costs_ptr[q] = dist;
+                        if (heap->colors[q] == WHITE)
+                            insertHeap(heap, q);
+                        else
+                            goUpHeap(heap, q);
+                    }
+                }
+            }
+        }
+    }
+
+    destroyHeap(&heap);
+    destroyAdjacency(&adj);
+    Py_DECREF(scales);
+    Py_DECREF(mask);
+
+    return Py_BuildValue("(NN)", costs, roots);
+
+    // error handling
+    err3:
+    Py_XDECREF(roots);
+    Py_XDECREF(costs);
+    err2:
+    destroyAdjacency(&adj);
+    PyErr_NoMemory();
+    err1:
+    Py_XDECREF(scales);
+    Py_XDECREF(mask);
     return NULL;
 }
