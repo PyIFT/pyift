@@ -59,7 +59,6 @@ Adjacency *circularAdjacency(float radii)
         return NULL;
     }
 
-    int center = 0;
     for (int i = 0, dy = -r_min; dy <= r_min; dy++) {
         for (int dx = -r_min; dx <= r_min; dx++) {
             float d = dx * dx + dy * dy;
@@ -69,8 +68,6 @@ Adjacency *circularAdjacency(float radii)
                 adj->dy[i] = dy;
                 adj->dz[i] = 0;
                 sq_dists[i] = d;
-                if ((dx == 0) && (dy == 0))
-                    center = i;
                 i++;
             }
         }
@@ -119,7 +116,6 @@ Adjacency *sphericAdjacency(float radii)
         return NULL;
     }
     
-    int center = 0;
     for (int i = 0, dz = -r_min; dz <= r_min; dz++) {
         for (int dy = -r_min; dy <= r_min; dy++) {
             for (int dx = -r_min; dx <= r_min; dx++) {
@@ -130,8 +126,6 @@ Adjacency *sphericAdjacency(float radii)
                     adj->dy[i] = dy;
                     adj->dz[i] = dz;
                     sq_dists[i] = d;
-                    if ((dx == 0) && (dy == 0) && (dz == 0))
-                        center = i;
                     i++;
                 }
             }
