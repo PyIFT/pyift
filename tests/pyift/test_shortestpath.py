@@ -134,3 +134,45 @@ class TestSeedCompetition:
 
         distance = sp.distance_transform_edt(mask)
         np.testing.assert_equal(distance, expected_dist)
+
+    def test_watershed_from_minima(self):
+        image = np.array([[7, 8, 9, 8, 8, 8],
+                          [6, 3, 9, 0, 9, 8],
+                          [4, 1, 6, 1, 1, 8],
+                          [3, 3, 5, 4, 4, 8],
+                          [1, 0, 7, 2, 2, 8],
+                          [6, 8, 9, 8, 9, 9]])
+
+        expected_costs = np.array([[7, 8, 9, 8, 8, 8],
+                                   [6, 3, 9, 0, 9, 8],
+                                   [4, 3, 6, 1, 1, 8],
+                                   [3, 3, 5, 4, 4, 8],
+                                   [1, 0, 7, 4, 4, 8],
+                                   [6, 8, 9, 8, 9, 9]])
+
+        expected_roots = np.array([[26, 26, 10, 10, 10, 10],
+                                   [26, 26, 10, 10, 10, 10],
+                                   [26, 26, 10, 10, 10, 10],
+                                   [26, 26, 26, 10, 10, 10],
+                                   [26, 26, 26, 10, 10, 10],
+                                   [26, 26, 26, 10, 10, 10]])
+
+        costs, roots = sp.watershed_from_minima(image, penalization=4.0)
+
+        np.testing.assert_equal(costs, expected_costs)
+        np.testing.assert_equal(roots, expected_roots)
+
+        mask = np.array([[0, 0, 0, 0, 0, 0],
+                         [0, 1, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 1, 0],
+                         [0, 1, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0, 0]], dtype=bool)
+
+        expected_costs[np.logical_not(mask)] = 0
+        expected_roots[np.logical_not(mask)] = 0
+
+        costs, roots = sp.watershed_from_minima(image, mask, penalization=4.0)
+
+        np.testing.assert_equal(costs, expected_costs)
+        np.testing.assert_equal(roots, expected_roots)
