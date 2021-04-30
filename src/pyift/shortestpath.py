@@ -201,3 +201,64 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
         return _pyift.dynamic_arc_weight_grid_root(image, seeds)
     else:
         raise NotImplementedError
+
+
+def distance_transform_edt(mask: np.ndarray, scales: Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Computes the euclidean distance transform using the IFT algorithm [3].
+
+    Parameters
+    ----------
+    mask : array_like
+        Binary mask of regions to compute the EDT from border.
+    scales : array_like, optional
+        Distance scale for each image axis.
+
+    Returns
+    -------
+    array_like
+        Euclidean distance transform mapping from boundaries.
+
+    Examples
+    --------
+
+    >>> import numpy as np
+    >>> from pyift.shortestpath import distance_transform_edt
+    >>>
+    >>> mask = np.array([[0, 0, 0, 0, 0, 0],
+    >>>                  [0, 1, 0, 1, 0, 0],
+    >>>                  [0, 1, 1, 1, 1, 0],
+    >>>                  [0, 1, 1, 1, 1, 0],
+    >>>                  [0, 1, 1, 0, 1, 0],
+    >>>                  [0, 0, 0, 0, 0, 0]], dtype=bool)
+    >>>
+    >>> distance_transform_edt(mask)
+
+    References
+    ----------
+    .. [3] Falcão, Alexandre X., Jorge Stolfi, and Roberto de Alencar Lotufo. "The image foresting transform:
+           Theory, algorithms, and applications." IEEE transactions on pattern analysis and
+           machine intelligence 26.1 (2004): 19-29.
+
+    """
+    if scales is None:
+        scales = np.ones(3)
+
+    if not isinstance(scales, np.ndarray):
+        scales = np.asarray(scales)
+
+    if scales.ndim != 1:
+        raise ValueError('`scales` must be a 1-dimensional array.')
+
+    if scales.shape[0] == 2:
+        scales = np.array((1, scales[0], scales[1]))
+
+    if scales.shape[0] != 3:
+        raise ValueError('`scales` must be a 2 or 3-dimensional array, %d found.' % scales.ndim)
+
+    if mask.ndim < 2 or mask.ndim > 3:
+        raise ValueError('`image` must be a 2 or 3-dimensional array, %d found.' % mask.ndim)
+
+    # distance and nearest points
+    distance, _ = _pyift.euclidean_distance_transform_grid(mask.astype(bool), scales)
+    return distance

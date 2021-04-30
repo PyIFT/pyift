@@ -21,6 +21,8 @@ PyObject *_seedCompetitionGraph(PyArrayObject *data, PyArrayObject *indices, PyA
 PyObject *_dynamicArcWeightGridRoot(PyArrayObject *image, PyArrayObject *seeds);
 PyObject *_dynamicArcWeightGridExpDecay(PyArrayObject *image, PyArrayObject *seeds, double alpha);
 
+PyObject *_euclideanDistanceTransformGrid(PyArrayObject *_mask, PyArrayObject *_scales);
+
 
 #ifdef __cplusplus
 }
