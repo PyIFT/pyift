@@ -23,6 +23,7 @@ PyObject *_dynamicArcWeightGridExpDecay(PyArrayObject *image, PyArrayObject *see
 
 PyObject *_euclideanDistanceTransformGrid(PyArrayObject *_mask, PyArrayObject *_scales);
 
+PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, double penalization);
 
 #ifdef __cplusplus
 }

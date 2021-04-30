@@ -93,6 +93,16 @@ PyObject *seed_competition_grid(PyObject *self, PyObject *args)
 }
 
 
+PyObject *watershed_from_minima_grid(PyObject *self, PyObject *args)
+{
+    PyArrayObject *image = NULL, *mask = NULL;
+    double penalization = 1;
+    if (!PyArg_ParseTuple(args, "O!O!d", &PyArray_Type, &image, &PyArray_Type, &mask, &penalization))
+        return NULL;
+    return _watershedFromMinimaGrid(image, mask, penalization);
+}
+
+
 // alphabetical order
 static PyMethodDef functions[] = {
     {"euclidean_distance_transform_grid", (PyCFunction) euclidean_distance_transform_grid, METH_VARARGS},
@@ -101,6 +111,7 @@ static PyMethodDef functions[] = {
     {"livewire_path", (PyCFunction) livewire_path, METH_VARARGS},
     {"seed_competition_graph", (PyCFunction) seed_competition_graph, METH_VARARGS},
     {"seed_competition_grid", (PyCFunction) seed_competition_grid, METH_VARARGS},
+    {"watershed_from_minima_grid", (PyCFunction) watershed_from_minima_grid, METH_VARARGS},
     {NULL, NULL} // sentinel
 };
 

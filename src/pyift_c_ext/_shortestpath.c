@@ -717,7 +717,7 @@ PyObject *_euclideanDistanceTransformGrid(PyArrayObject *_mask, PyArrayObject *_
         shape.x = PyArray_DIM(mask, 2);
         adj = sphericAdjacency(1.75);
     } else {
-        PyErr_SetString(PyExc_TypeError, "`seedCompetitionGrid` expected input with 3 or 4 number of dimensions.");
+        PyErr_SetString(PyExc_TypeError, "`euclideanDistanceTransform` expected input with 2 or 3 number of dimensions.");
         goto err2;
     }
 
@@ -812,6 +812,120 @@ PyObject *_euclideanDistanceTransformGrid(PyArrayObject *_mask, PyArrayObject *_
     PyErr_NoMemory();
     err1:
     Py_XDECREF(scales);
+    Py_XDECREF(mask);
+    return NULL;
+}
+
+
+PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, double penalization)
+{
+    if (PyArray_NDIM(_image) != PyArray_NDIM(_mask)) {
+        PyErr_SetString(PyExc_TypeError, "`image` and `mask` must have the same number of dimensions.");
+        return NULL;
+    }
+
+    PyArrayObject *image = NULL, *mask = NULL;
+    image = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _image, NPY_DOUBLE, NPY_ARRAY_CARRAY_RO);
+    mask = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _mask, NPY_BOOL, NPY_ARRAY_CARRAY_RO);
+    if (!image || !mask) goto err1;
+
+    Coord shape;
+    Adjacency *adj = NULL;
+    if (PyArray_NDIM(image) == 2) {
+        shape.z = 1;
+        shape.y = PyArray_DIM(image, 0);
+        shape.x = PyArray_DIM(image, 1);
+        adj = circularAdjacency(1.0);
+    } else if (PyArray_NDIM(image) == 3) {
+        shape.z = PyArray_DIM(image, 0);
+        shape.y = PyArray_DIM(image, 1);
+        shape.x = PyArray_DIM(image, 2);
+        adj = sphericAdjacency(1.0);
+    } else {
+        PyErr_SetString(PyExc_TypeError, "`orientedFromMinima` expected input with 2 or 3 number of dimensions.");
+        goto err2;
+    }
+
+    if (!adj) goto err2;
+
+    int size = shape.x * shape.y * shape.z;
+
+    PyArrayObject *costs = NULL, *roots = NULL;
+    costs = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(image), PyArray_DIMS(image), NPY_DOUBLE);
+    roots = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(image), PyArray_DIMS(image), NPY_LONG);
+    if (!costs || !roots) goto err3;
+
+    double *image_ptr = PyArray_DATA(image);
+    bool *mask_ptr = PyArray_DATA(mask);
+    double *costs_ptr = PyArray_DATA(costs);
+    long *roots_ptr = PyArray_DATA(roots);
+
+    Heap *heap = createHeap(size, costs_ptr);
+    if (!heap) goto err3;
+
+    for (int i = 0; i < size; i++)
+    {
+        if (mask_ptr[i])
+        {
+            roots_ptr[i] = i;
+            costs_ptr[i] = image_ptr[i] + penalization;
+            insertHeap(heap, i);
+        }
+    }
+
+    while (!emptyHeap(heap))
+    {
+        int p = popHeap(heap);
+        Coord u = indexToCoord(&shape, p);
+        if (roots_ptr[p] == p)
+            costs_ptr[p] = image_ptr[p];
+
+        for (int i = 1; i < adj->size; i++)
+        {
+            Coord v = adjacentCoord(&u, adj, i);
+            if (validCoord(&shape, &v))
+            {
+                int q = coordToIndex(&shape, &v);
+                if (mask_ptr[q] && heap->colors[q] != BLACK)
+                {
+                    double dist = PyArray_MAX(image_ptr[q], costs_ptr[p]);
+                    if (dist < costs_ptr[q])
+                    {
+                        roots_ptr[q] = roots_ptr[p];
+                        costs_ptr[q] = dist;
+                        goUpHeap(heap, q);
+                    }
+                }
+            }
+        }
+    }
+
+    // avoiding zero label
+    for (int i = 0; i < size; i++) {
+        if (mask_ptr[i])
+            roots_ptr[i]++;
+        else {
+            roots_ptr[i] = 0;
+            costs_ptr[i] = 0;
+        }
+    }
+
+    destroyHeap(&heap);
+    destroyAdjacency(&adj);
+    Py_DECREF(image);
+    Py_DECREF(mask);
+
+    return Py_BuildValue("(NN)", costs, roots);
+
+    // error handling
+    err3:
+    Py_XDECREF(roots);
+    Py_XDECREF(costs);
+    err2:
+    destroyAdjacency(&adj);
+    PyErr_NoMemory();
+    err1:
+    Py_XDECREF(image);
     Py_XDECREF(mask);
     return NULL;
 }

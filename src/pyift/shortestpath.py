@@ -241,6 +241,9 @@ def distance_transform_edt(mask: np.ndarray, scales: Optional[np.ndarray] = None
            machine intelligence 26.1 (2004): 19-29.
 
     """
+    if not isinstance(mask, np.ndarray):
+        raise TypeError('`mask` must be a `ndarray`.')
+
     if scales is None:
         scales = np.ones(3)
 
@@ -262,3 +265,64 @@ def distance_transform_edt(mask: np.ndarray, scales: Optional[np.ndarray] = None
     # distance and nearest points
     distance, _ = _pyift.euclidean_distance_transform_grid(mask.astype(bool), scales)
     return distance
+
+
+def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None,
+                          penalization: float = 1.0) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Computes the watershed transform on grayscales images from minimum with the IFT algorithm [4].
+
+    Parameters
+    ----------
+    image : array_like
+        Grayscale 2D or 3D image.
+    mask : array_like, optional
+        Binary mask of regions to compute the watershed transform.
+    penalization : float
+        Parameter to adjust the catchment basins of watershed. Greater the value the more the neighboring
+        minima will merge into a single region.
+
+    Returns
+    -------
+    array_like, array_like
+        Optimum-path costs and roots (minima) from watershed basins.
+
+    Examples
+    --------
+
+    >>> import numpy as np
+    >>> from pyift.shortestpath import watershed_from_minima
+    >>>
+    >>> image = np.array([[7, 8, 9, 8, 8, 8],
+    >>>                   [6, 3, 9, 0, 9, 8],
+    >>>                   [4, 1, 6, 1, 1, 8],
+    >>>                   [3, 3, 5, 4, 4, 8],
+    >>>                   [1, 0, 7, 2, 2, 8],
+    >>>                   [6, 8, 9, 8, 9, 9]])
+    >>>
+    >>> watershed_from_minima(image)
+
+    References
+    ----------
+    .. [4] Falcão, Alexandre X., Jorge Stolfi, and Roberto de Alencar Lotufo. "The image foresting transform:
+           Theory, algorithms, and applications." IEEE transactions on pattern analysis and
+           machine intelligence 26.1 (2004): 19-29.
+
+    """
+    if not isinstance(image, np.ndarray):
+        raise TypeError('`image` must be a `ndarray`.')
+
+    if mask is None:
+        mask = np.ones_like(image, dtype=bool)
+
+    if not isinstance(mask, np.ndarray):
+        raise TypeError('`mask` must be a `ndarray`.')
+
+    if image.shape != mask.shape:
+        raise ValueError('`image` and `mask` must have the same dimensions, %r and %r found.' %
+                         (image.shape, mask.shape))
+
+    if image.ndim < 2 or image.ndim > 3:
+        raise ValueError('`image` must be a 2 or 3-dimensional array, %d found.' % image.ndim)
+
+    return _pyift.watershed_from_minima_grid(image, mask.astype(bool), penalization)
