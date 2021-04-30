@@ -243,6 +243,124 @@ PyObject *_seedCompetitionGraph(PyArrayObject *_weights, PyArrayObject *_indices
 }
 
 
+/*
+PyObject *_orientedFromExtremaGrid(PyArrayObject *_image)
+{
+    PyArrayObject *image = NULL;
+    image = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _image, NPY_INT, NPY_ARRAY_CARRAY_RO);
+    if (!image) goto err1;
+
+    Coord shape;
+    Adjacency *adj = NULL;
+    if (PyArray_NDIM(image) == 2) {
+        shape.z = 1;
+        shape.y = PyArray_DIM(image, 0);
+        shape.x = PyArray_DIM(image, 1);
+        adj = circularAdjacency(1.0);
+    } else if (PyArray_NDIM(image) == 3) {
+        shape.z = PyArray_DIM(image, 0);
+        shape.y = PyArray_DIM(image, 1);
+        shape.x = PyArray_DIM(image, 2);
+        adj = sphericAdjacency(1.0);
+    } else {
+        PyErr_SetString(PyExc_TypeError, "`seedCompetitionGrid` expected input with 2 or 3 number of dimensions.");
+        goto err2;
+    }
+
+    if (!adj) goto err2;
+
+    int size = shape.x * shape.y * shape.z;
+
+    PyArrayObject *costs = NULL, *roots = NULL;
+    costs = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(image), PyArray_DIMS(image), NPY_DOUBLE);
+    roots = (PyArrayObject*) PyArray_SimpleNew(PyArray_NDIM(image), PyArray_DIMS(image), NPY_LONG);
+    if (!costs || !roots) goto err3;
+
+    double *image_ptr = PyArray_DATA(image);
+    double *costs_ptr = PyArray_DATA(costs);
+    long *roots_ptr = PyArray_DATA(roots);
+
+    Heap *heap = createHeap(size, costs_ptr);
+    if (!heap) goto err3;
+
+    int image_max = 0, image_min =
+    for (int i = 0; i < size; i++) {
+        image_max = (image_ptr[i] > image_max) ? image_ptr[i] : image_max;
+        image_min = (image_ptr[i] < image_min) ? image_ptr[i] : image_min;
+    }
+
+    for (int i = 0; i < size; i++)
+    {
+        roots_ptr[i] = i;
+        if (seeds_ptr[i] > 0) {
+            costs_ptr[i] = 0;
+            labels_ptr[i] = seeds_ptr[i];
+            insertHeap(heap, i);
+        } else {
+            costs_ptr[i] = DBL_MAX;
+            labels_ptr[i] = -1;
+        }
+    }
+
+    while (!emptyHeap(heap))
+    {
+        long p = popHeap(heap);
+        int p_stride = p * d;
+        Coord u = indexToCoord(&shape, p);
+        for (int i = 1; i < adj->size; i++)
+        {
+            Coord v = adjacentCoord(&u, adj, i);
+            if (validCoord(&shape, &v))
+            {
+                int q = coordToIndex(&shape, &v);
+                if (heap->colors[q] != BLACK)
+                {
+                    int q_stride = q * d;
+                    double dist = 0;
+                    for (int j = 0; j < d; j++)
+                        dist += square(image_ptr[p_stride + j] - image_ptr[q_stride + j]);
+                    dist = sqrt(dist);
+                    dist = PyArray_MAX(dist, costs_ptr[p]);
+                    if (dist < costs_ptr[q])
+                    {
+                        roots_ptr[q] = roots_ptr[p];
+                        labels_ptr[q] = labels_ptr[p];
+                        preds_ptr[q] = p;
+                        costs_ptr[q] = dist;
+                        if (heap->colors[q] == WHITE)
+                            insertHeap(heap, q);
+                        else
+                            goUpHeap(heap, q);
+                    }
+                }
+            }
+        }
+    }
+
+    destroyHeap(&heap);
+    destroyAdjacency(&adj);
+    Py_DECREF(seeds);
+    Py_DECREF(image);
+
+    return Py_BuildValue("(NNNN)", costs, roots, preds, labels);
+
+    // error handling
+    err3:
+    Py_XDECREF(labels);
+    Py_XDECREF(preds);
+    Py_XDECREF(roots);
+    Py_XDECREF(costs);
+    err2:
+    destroyAdjacency(&adj);
+    PyErr_NoMemory();
+    err1:
+    Py_XDECREF(seeds);
+    Py_XDECREF(image);
+    return NULL;
+}
+*/
+
+
 static void free_double_matrix(double **matrix, int length)
 {
     if (!matrix) return;
