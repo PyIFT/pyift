@@ -28,6 +28,15 @@ PyObject *dynamic_arc_weight_grid_exp_decay(PyObject *self, PyObject *args)
 }
 
 
+PyObject *dynamic_arc_weight_grid_label(PyObject *self, PyObject *args)
+{
+    PyArrayObject *image = NULL, *seeds = NULL;
+    if (!PyArg_ParseTuple(args, "O!O!", &PyArray_Type, &image, &PyArray_Type, &seeds))
+        return NULL;
+    return _dynamicArcWeightGridLabel(image, seeds);
+}
+
+
 PyObject *dynamic_arc_weight_grid_root(PyObject *self, PyObject *args)
 {
     PyArrayObject *image = NULL, *seeds = NULL;
@@ -107,6 +116,7 @@ PyObject *watershed_from_minima_grid(PyObject *self, PyObject *args)
 static PyMethodDef functions[] = {
     {"euclidean_distance_transform_grid", (PyCFunction) euclidean_distance_transform_grid, METH_VARARGS},
     {"dynamic_arc_weight_grid_exp_decay", (PyCFunction) dynamic_arc_weight_grid_exp_decay, METH_VARARGS},
+    {"dynamic_arc_weight_grid_label", (PyCFunction) dynamic_arc_weight_grid_label, METH_VARARGS},
     {"dynamic_arc_weight_grid_root", (PyCFunction) dynamic_arc_weight_grid_root, METH_VARARGS},
     {"livewire_path", (PyCFunction) livewire_path, METH_VARARGS},
     {"seed_competition_graph", (PyCFunction) seed_competition_graph, METH_VARARGS},
