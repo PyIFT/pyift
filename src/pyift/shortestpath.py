@@ -134,7 +134,7 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
     image_3d : bool, optional
         Indicates if it is a 3D image or a 2D image with multiple bands,
         by default 'False'.
-    mode : {'root', 'exp'}, default='root'
+    mode : {'root', 'label', 'exp'}, default='root'
         Indicates the average computation policy.
     alpha : float, optional
         Parameter of weight decay for exponential averaging, only valid
@@ -170,7 +170,7 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
            Iberoamerican Congress on Pattern Recognition. Springer, Cham, 2018.
 
     """
-    allowed_modes = ('exp', 'root')
+    allowed_modes = ('exp', 'label', 'root')
     if mode not in allowed_modes:
         raise ValueError('`mode` must belong to %r' % (allowed_modes, ))
 
@@ -197,6 +197,8 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
                          (image.shape[:-1], seeds.shape))
     if mode == 'exp':
         return _pyift.dynamic_arc_weight_grid_exp_decay(image, seeds, alpha)
+    elif mode == 'label':
+        return _pyift.dynamic_arc_weight_grid_label(image, seeds)
     elif mode == 'root':
         return _pyift.dynamic_arc_weight_grid_root(image, seeds)
     else:
