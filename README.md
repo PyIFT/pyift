@@ -6,7 +6,7 @@
 
 ## Python Image Foresting Transform Library
 
-PyIFT is a Python wrapper of a fork the [LIDS](http://lids.ic.unicamp.br/) C library.
+PyIFT is a Python wrapper of a fork of the [LIDS](http://lids.ic.unicamp.br/) C library.
 
 Its main feature is fast shortest-path algorithms in image grids and sparse graphs to perform the image foresting transform operators.
 
