@@ -267,8 +267,8 @@ def distance_transform_edt(mask: np.ndarray, scales: Optional[np.ndarray] = None
     return distance
 
 
-def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None,
-                          penalization: float = 1.0) -> Tuple[np.ndarray, np.ndarray]:
+def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None, penalization: float = 1.0,
+                          compactness: float = 0.0, scales: Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray]:
     """
     Computes the watershed transform on grayscales images from minimum with the IFT algorithm [4].
 
@@ -281,6 +281,11 @@ def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None,
     penalization : float
         Parameter to adjust the catchment basins of watershed. Greater the value the more the neighboring
         minima will merge into a single region.
+    compactness : float, optional
+        Optional parameter to adjust trade-off between distancing from minimum (compact segment) and following the
+        image topology.
+    scales : array_like, optional
+        Scales of image dimensions, useful for anisotropic data.
 
     Returns
     -------
@@ -312,6 +317,21 @@ def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None,
     if not isinstance(image, np.ndarray):
         raise TypeError('`image` must be a `ndarray`.')
 
+    if scales is None:
+        scales = np.ones(3)
+
+    if not isinstance(scales, np.ndarray):
+        scales = np.asarray(scales)
+
+    if scales.ndim != 1:
+        raise ValueError('`scales` must be a 1-dimensional array.')
+
+    if scales.shape[0] == 2:
+        scales = np.array((1, scales[0], scales[1]))
+
+    if scales.shape[0] != 3:
+        raise ValueError('`scales` must be a 2 or 3-dimensional array, %d found.' % scales.ndim)
+
     if mask is None:
         mask = np.ones_like(image, dtype=bool)
 
@@ -325,4 +345,4 @@ def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None,
     if image.ndim < 2 or image.ndim > 3:
         raise ValueError('`image` must be a 2 or 3-dimensional array, %d found.' % image.ndim)
 
-    return _pyift.watershed_from_minima_grid(image, mask.astype(bool), penalization)
+    return _pyift.watershed_from_minima_grid(image, mask.astype(bool), penalization, compactness, scales)
