@@ -49,7 +49,7 @@ def setup_package():
     exts = [Extension('_pyift',
                       sources=_get_sources(),
                       include_dirs=_get_includes(),
-                      extra_compile_args=['-std=gnu11'])
+                      extra_compile_args=['-std=gnu11', '-O3'])
             ]
 
     meta_data = dict(name='pyift',
