@@ -157,7 +157,7 @@ class TestSeedCompetition:
                                    [26, 26, 26, 10, 10, 10],
                                    [26, 26, 26, 10, 10, 10]])
 
-        costs, roots = sp.watershed_from_minima(image, penalization=4.0)
+        costs, roots = sp.watershed_from_minima(image, H_minima=4.0)
 
         np.testing.assert_equal(costs, expected_costs)
         np.testing.assert_equal(roots, expected_roots)
@@ -172,7 +172,7 @@ class TestSeedCompetition:
         expected_costs[np.logical_not(mask)] = 0
         expected_roots[np.logical_not(mask)] = 0
 
-        costs, roots = sp.watershed_from_minima(image, mask, penalization=4.0)
+        costs, roots = sp.watershed_from_minima(image, mask, H_minima=4.0)
 
         np.testing.assert_equal(costs, expected_costs)
         np.testing.assert_equal(roots, expected_roots)

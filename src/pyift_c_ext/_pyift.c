@@ -95,12 +95,12 @@ PyObject *seed_competition_grid(PyObject *self, PyObject *args)
 
 PyObject *watershed_from_minima_grid(PyObject *self, PyObject *args)
 {
-    PyArrayObject *image = NULL, *mask = NULL, *scale = NULL;
-    double penalization = 1, compactness = 0;
-    if (!PyArg_ParseTuple(args, "O!O!ddO!", &PyArray_Type, &image, &PyArray_Type, &mask, &penalization,
-                          &compactness, &PyArray_Type, &scale))
+    PyArrayObject *image = NULL, *mask = NULL, *H_minima = NULL, *scale = NULL;
+    double compactness = 0;
+    if (!PyArg_ParseTuple(args, "O!O!O!dO!", &PyArray_Type, &image, &PyArray_Type, &mask,
+                          &PyArray_Type, &H_minima, &compactness, &PyArray_Type, &scale))
         return NULL;
-    return _watershedFromMinimaGrid(image, mask, penalization, compactness, scale);
+    return _watershedFromMinimaGrid(image, mask, H_minima, compactness, scale);
 }
 
 

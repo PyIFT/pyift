@@ -267,10 +267,10 @@ def distance_transform_edt(mask: np.ndarray, scales: Optional[np.ndarray] = None
     return distance
 
 
-def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None, penalization: float = 1.0,
+def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None, H_minima: float = 1.0,
                           compactness: float = 0.0, scales: Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Computes the watershed transform on grayscales images from minimum with the IFT algorithm [4].
+    Computes the watershed transform on grayscales images from minimum using the IFT algorithm [5].
 
     Parameters
     ----------
@@ -278,9 +278,9 @@ def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None, 
         Grayscale 2D or 3D image.
     mask : array_like, optional
         Binary mask of regions to compute the watershed transform.
-    penalization : float
-        Parameter to adjust the catchment basins of watershed. Greater the value the more the neighboring
-        minima will merge into a single region.
+    H_minima : array_like, float
+        Dynamics threshold for watershed from minima as described in [4].
+        The greater the value the more the neighboring minima will merge into a single region.
     compactness : float, optional
         Optional parameter to adjust trade-off between distancing from minimum (compact segment) and following the
         image topology.
@@ -309,7 +309,11 @@ def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None, 
 
     References
     ----------
-    .. [4] Falcão, Alexandre X., Jorge Stolfi, and Roberto de Alencar Lotufo. "The image foresting transform:
+    .. [4] Najman, Laurent, and Michel Schmitt. "Geodesic saliency of watershed contours and
+           hierarchical segmentation." IEEE Transactions on pattern analysis and machine
+           intelligence 18, no. 12 (1996): 1163-1173.
+
+    .. [5] Falcão, Alexandre X., Jorge Stolfi, and Roberto de Alencar Lotufo. "The image foresting transform:
            Theory, algorithms, and applications." IEEE transactions on pattern analysis and
            machine intelligence 26.1 (2004): 19-29.
 
@@ -345,4 +349,7 @@ def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None, 
     if image.ndim < 2 or image.ndim > 3:
         raise ValueError('`image` must be a 2 or 3-dimensional array, %d found.' % image.ndim)
 
-    return _pyift.watershed_from_minima_grid(image, mask.astype(bool), penalization, compactness, scales)
+    if not isinstance(H_minima, np.ndarray):
+        H_minima = np.full_like(image, fill_value=H_minima)
+
+    return _pyift.watershed_from_minima_grid(image, mask.astype(bool), H_minima, compactness, scales)
