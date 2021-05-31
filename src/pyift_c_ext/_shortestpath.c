@@ -984,7 +984,7 @@ PyObject *_euclideanDistanceTransformGrid(PyArrayObject *_mask, PyArrayObject *_
 }
 
 
-PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, double penalization,
+PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, PyArrayObject *_H_minima,
                                    double compactness, PyArrayObject *_scales)
 {
     if (PyArray_NDIM(_scales) != 1) {
@@ -1002,11 +1002,17 @@ PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, 
         return NULL;
     }
 
-    PyArrayObject *image = NULL, *mask = NULL, *scales;
+    if (PyArray_NDIM(_image) != PyArray_NDIM(_H_minima)) {
+        PyErr_SetString(PyExc_TypeError, "`image` and `H_minima` must have the same number of dimensions.");
+        return NULL;
+    }
+
+    PyArrayObject *image = NULL, *mask = NULL, *H_minima = NULL, *scales = NULL;
     image = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _image, NPY_DOUBLE, NPY_ARRAY_CARRAY_RO);
+    H_minima = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _H_minima, NPY_DOUBLE, NPY_ARRAY_CARRAY_RO);
     mask = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _mask, NPY_BOOL, NPY_ARRAY_CARRAY_RO);
     scales = (PyArrayObject*) PyArray_FROM_OTF((PyObject*) _scales, NPY_DOUBLE, NPY_ARRAY_CARRAY_RO);
-    if (!image || !mask || !scales) goto err1;
+    if (!image || !mask || !H_minima || !scales) goto err1;
 
     Coord shape;
     Adjacency *adj = NULL;
@@ -1021,7 +1027,7 @@ PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, 
         shape.x = PyArray_DIM(image, 2);
         adj = sphericAdjacency(1.0);
     } else {
-        PyErr_SetString(PyExc_TypeError, "`orientedFromMinima` expected input with 2 or 3 number of dimensions.");
+        PyErr_SetString(PyExc_TypeError, "`watershedFromMinima` expected input with 2 or 3 number of dimensions.");
         goto err2;
     }
 
@@ -1036,6 +1042,7 @@ PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, 
 
     double *image_ptr = PyArray_DATA(image);
     bool *mask_ptr = PyArray_DATA(mask);
+    double *H_minima_ptr = PyArray_DATA(H_minima);
     double *costs_ptr = PyArray_DATA(costs);
     long *roots_ptr = PyArray_DATA(roots);
     double *scales_ptr = PyArray_DATA(scales);
@@ -1052,7 +1059,7 @@ PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, 
         if (mask_ptr[i])
         {
             roots_ptr[i] = i;
-            costs_ptr[i] = image_ptr[i] + penalization;
+            costs_ptr[i] = image_ptr[i] + H_minima_ptr[i];
             insertHeap(heap, i);
         }
     }
@@ -1106,6 +1113,7 @@ PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, 
     destroyAdjacency(&adj);
     Py_DECREF(image);
     Py_DECREF(mask);
+    Py_DECREF(H_minima);
     Py_DECREF(scales);
 
     return Py_BuildValue("(NN)", costs, roots);
@@ -1120,6 +1128,7 @@ PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, 
     err1:
     Py_XDECREF(image);
     Py_XDECREF(mask);
+    Py_XDECREF(H_minima);
     Py_XDECREF(scales);
     return NULL;
 }
