@@ -26,6 +26,7 @@ typedef struct ift_heap {
     double *values;
     int *nodes;
     int *pos;
+    int *ages;
     int last;
     int size;
     nodeColor  *colors;
@@ -35,12 +36,12 @@ typedef struct ift_heap {
 
 Heap *createHeap(int size, double *values);
 void destroyHeap(Heap **heap_address);
-bool insertHeap(Heap *heap, int index);
+bool insertHeap(Heap *heap, int index, int pred_index);
 int popHeap(Heap *heap);
 bool removeHeap(Heap *heap, int index);
 void resetHeap(Heap *heap);
-void goUpHeap(Heap *heap, int index);
-void goDownHeap(Heap *heap, int index);
+void goUpHeap(Heap *heap, int index, int pred_index);
+void goDownHeap(Heap *heap, int index, int pred_index);
 
 
 inline bool fullHeap(const Heap *heap)

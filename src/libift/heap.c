@@ -14,23 +14,20 @@ Heap *createHeap(int size, double *values)
     heap->last = -1;
     heap->size = size;
     heap->colors = malloc(size * sizeof *heap->colors);
+    heap->ages = malloc(size * sizeof *heap->ages);
     heap->policy = MINIMUM;
 
-    if (!heap->nodes || !heap->pos || !heap->colors)
+    if (!heap->nodes || !heap->pos || !heap->colors || !heap->ages)
     {
-        if (heap->nodes) free(heap->nodes);
-        if (heap->pos) free(heap->pos);
-        if (heap->colors) free(heap->colors);
+        free(heap->nodes);
+        free(heap->pos);
+        free(heap->colors);
+        free(heap->ages);
         free(heap);
         return NULL;
     }
 
-    for (int i = 0; i < heap->size; i++)
-    {
-        heap->nodes[i] = -1;
-        heap->pos[i] = -1;
-        heap->colors[i] = WHITE;
-    }
+    resetHeap(heap);
 
     return heap;
 }
@@ -43,6 +40,7 @@ void destroyHeap(Heap **heap_address)
     free(heap->nodes);
     free(heap->pos);
     free(heap->colors);
+    free(heap->ages);
     free(heap);
     *heap_address = NULL;
 }
@@ -78,13 +76,19 @@ inline void _swap(Heap *heap, int i, int j)
 
 inline bool _lower(Heap *heap, int i, int j)
 {
-    return (heap->values[heap->nodes[i]] < heap->values[heap->nodes[j]]);
+    int ni = heap->nodes[i], nj = heap->nodes[j];
+    if (heap->values[ni] == heap->values[nj])
+        return heap->ages[ni] < heap->ages[nj];
+    return heap->values[ni] < heap->values[nj];
 }
 
 
 inline bool _greater(Heap *heap, int i, int j)
 {
-    return (heap->values[heap->nodes[i]] > heap->values[heap->nodes[j]]);
+    int ni = heap->nodes[i], nj = heap->nodes[j];
+        if (heap->values[ni] == heap->values[nj])
+            return heap->ages[ni] > heap->ages[nj];
+    return heap->values[ni] > heap->values[nj];
 }
 
 
@@ -130,11 +134,22 @@ void _goDownHeapPosition(Heap *heap, int pos)
 }
 
 
-bool insertHeap(Heap *heap, int index)
+inline bool _tryUpdateAge(Heap *heap, int index, int pred_index)
+{
+    if (pred_index >= 0)
+        heap->ages[index] = heap->ages[pred_index] + 1;
+    else
+        heap->ages[index] = 0;
+}
+
+
+bool insertHeap(Heap *heap, int index, int pred_index)
 {
     if (fullHeap(heap))
         return false;
-    
+
+    _tryUpdateAge(heap, index, pred_index);
+
     heap->last++;
     heap->nodes[heap->last] = index;
     heap->colors[index] = GRAY;
@@ -174,7 +189,7 @@ bool removeHeap(Heap *heap, int index)
     else
         heap->values[index] = DBL_MIN;
 
-    goUpHeap(heap, index);
+    goUpHeap(heap, index, -1);
     popHeap(heap);
 
     heap->values[index] = value;
@@ -190,18 +205,21 @@ void resetHeap(Heap *heap)
         heap->nodes[i] = -1;
         heap->pos[i] = -1;
         heap->colors[i] = WHITE;
+        heap->ages[i] = 0;
     }
     heap->last = -1;
 }
 
 
-void goUpHeap(Heap *heap, int index)
+void goUpHeap(Heap *heap, int index, int pred_index)
 {
+    _tryUpdateAge(heap, index, pred_index);
     _goUpHeapPosition(heap, heap->pos[index]);
 }
 
 
-void goDownHeap(Heap *heap, int index)
+void goDownHeap(Heap *heap, int index, int pred_index)
 {
+    _tryUpdateAge(heap, index, pred_index);
     _goDownHeapPosition(heap, heap->pos[index]);
 }

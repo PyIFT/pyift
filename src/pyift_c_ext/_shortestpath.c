@@ -72,7 +72,7 @@ PyObject *_seedCompetitionGrid(PyArrayObject *_image, PyArrayObject *_seeds)
         if (seeds_ptr[i] > 0) {
             costs_ptr[i] = 0;
             labels_ptr[i] = seeds_ptr[i];
-            insertHeap(heap, i);
+            insertHeap(heap, i, -1);
         } else {
             costs_ptr[i] = DBL_MAX;
             labels_ptr[i] = -1;
@@ -105,9 +105,9 @@ PyObject *_seedCompetitionGrid(PyArrayObject *_image, PyArrayObject *_seeds)
                         preds_ptr[q] = p;
                         costs_ptr[q] = dist;
                         if (heap->colors[q] == WHITE)
-                            insertHeap(heap, q);
+                            insertHeap(heap, q, p);
                         else
-                            goUpHeap(heap, q);
+                            goUpHeap(heap, q, p);
                     }
                 }
             }
@@ -188,7 +188,7 @@ PyObject *_seedCompetitionGraph(PyArrayObject *_weights, PyArrayObject *_indices
         if (seeds_ptr[i] > 0) {
             costs_ptr[i] = 0;
             labels_ptr[i] = seeds_ptr[i];
-            insertHeap(heap, i);
+            insertHeap(heap, i, -1);
         } else {
             costs_ptr[i] = DBL_MAX;
             labels_ptr[i] = -1;
@@ -211,9 +211,9 @@ PyObject *_seedCompetitionGraph(PyArrayObject *_weights, PyArrayObject *_indices
                     preds_ptr[q] = p;
                     costs_ptr[q] = dist;
                     if (heap->colors[q] == WHITE)
-                        insertHeap(heap, q);
+                        insertHeap(heap, q, p);
                     else
-                        goUpHeap(heap, q);
+                        goUpHeap(heap, q, p);
                 }
             }
         }
@@ -295,7 +295,7 @@ PyObject *_orientedFromExtremaGrid(PyArrayObject *_image)
         if (seeds_ptr[i] > 0) {
             costs_ptr[i] = 0;
             labels_ptr[i] = seeds_ptr[i];
-            insertHeap(heap, i);
+            insertHeap(heap, i, -1);
         } else {
             costs_ptr[i] = DBL_MAX;
             labels_ptr[i] = -1;
@@ -328,9 +328,9 @@ PyObject *_orientedFromExtremaGrid(PyArrayObject *_image)
                         preds_ptr[q] = p;
                         costs_ptr[q] = dist;
                         if (heap->colors[q] == WHITE)
-                            insertHeap(heap, q);
+                            insertHeap(heap, q, p);
                         else
-                            goUpHeap(heap, q);
+                            goUpHeap(heap, q, p);
                     }
                 }
             }
@@ -440,7 +440,7 @@ PyObject *_dynamicArcWeightGridRoot(PyArrayObject *_image, PyArrayObject *_seeds
             labels_ptr[i] = seeds_ptr[i];
             tree_avgs[i] = calloc(d, sizeof **tree_avgs);
             if (!tree_avgs[i]) goto err4;
-            insertHeap(heap, i);
+            insertHeap(heap, i, -1);
         } else {
             costs_ptr[i] = DBL_MAX;
             labels_ptr[i] = -1;
@@ -481,9 +481,9 @@ PyObject *_dynamicArcWeightGridRoot(PyArrayObject *_image, PyArrayObject *_seeds
                         preds_ptr[q] = p;
                         costs_ptr[q] = dist;
                         if (heap->colors[q] == WHITE)
-                            insertHeap(heap, q);
+                            insertHeap(heap, q, p);
                         else
-                            goUpHeap(heap, q);
+                            goUpHeap(heap, q, p);
                     }
                 }
             }
@@ -611,7 +611,7 @@ PyObject *_dynamicArcWeightGridLabel(PyArrayObject *_image, PyArrayObject *_seed
                 tree_avgs[l] = calloc(d, sizeof **tree_avgs);
                 if (!tree_avgs[l]) goto err4;
             }
-            insertHeap(heap, i);
+            insertHeap(heap, i, -1);
         } else {
             costs_ptr[i] = DBL_MAX;
             labels_ptr[i] = -1;
@@ -652,9 +652,9 @@ PyObject *_dynamicArcWeightGridLabel(PyArrayObject *_image, PyArrayObject *_seed
                         preds_ptr[q] = p;
                         costs_ptr[q] = dist;
                         if (heap->colors[q] == WHITE)
-                            insertHeap(heap, q);
+                            insertHeap(heap, q, p);
                         else
-                            goUpHeap(heap, q);
+                            goUpHeap(heap, q, p);
                     }
                 }
             }
@@ -773,7 +773,7 @@ PyObject *_dynamicArcWeightGridExpDecay(PyArrayObject *_image, PyArrayObject *_s
         if (seeds_ptr[i] > 0) {
             costs_ptr[i] = 0;
             labels_ptr[i] = seeds_ptr[i];
-            insertHeap(heap, i);
+            insertHeap(heap, i, -1);
             for (int j = 0, i_stride = i * d; j < d; j++, i_stride++) {
                 tree_avgs_ptr[i_stride] = image_ptr[i_stride];
             }
@@ -820,9 +820,9 @@ PyObject *_dynamicArcWeightGridExpDecay(PyArrayObject *_image, PyArrayObject *_s
                         preds_ptr[q] = p;
                         costs_ptr[q] = dist;
                         if (heap->colors[q] == WHITE)
-                            insertHeap(heap, q);
+                            insertHeap(heap, q, p);
                         else
-                            goUpHeap(heap, q);
+                            goUpHeap(heap, q, p);
                     }
                 }
             }
@@ -922,7 +922,7 @@ PyObject *_euclideanDistanceTransformGrid(PyArrayObject *_mask, PyArrayObject *_
                 if (validCoord(&shape, &v)) {
                     int q = coordToIndex(&shape, &v);
                     if (mask_ptr[q]) {
-                        insertHeap(heap, p);
+                        insertHeap(heap, p, -1);
                         break;
                     }
                 }
@@ -954,9 +954,9 @@ PyObject *_euclideanDistanceTransformGrid(PyArrayObject *_mask, PyArrayObject *_
                         roots_ptr[q] = roots_ptr[p];
                         costs_ptr[q] = dist;
                         if (heap->colors[q] == WHITE)
-                            insertHeap(heap, q);
+                            insertHeap(heap, q, p);
                         else
-                            goUpHeap(heap, q);
+                            goUpHeap(heap, q, p);
                     }
                 }
             }
@@ -1060,7 +1060,7 @@ PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, 
         {
             roots_ptr[i] = i;
             costs_ptr[i] = image_ptr[i] + H_minima_ptr[i];
-            insertHeap(heap, i);
+            insertHeap(heap, i, -1);
         }
     }
 
@@ -1092,7 +1092,7 @@ PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, 
                     {
                         roots_ptr[q] = roots_ptr[p];
                         costs_ptr[q] = dist;
-                        goUpHeap(heap, q);
+                        goUpHeap(heap, q, p);
                     }
                 }
             }
