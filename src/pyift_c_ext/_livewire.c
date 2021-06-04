@@ -60,7 +60,7 @@ PyObject *_livewirePath(PyArrayObject *image, PyArrayObject *saliency, PyArrayOb
     preds_ptr[src] = -1;
     labels_ptr[src] = false;
 
-    insertHeap(heap, src);
+    insertHeap(heap, src, -1);
 
     Set *seen = NULL;
     pushSet(&seen, src);
@@ -112,10 +112,10 @@ PyObject *_livewirePath(PyArrayObject *image, PyArrayObject *saliency, PyArrayOb
                             preds_ptr[q] = p;
                             costs_ptr[q] = dist;
                             if (heap->colors[q] == WHITE) {
-                                insertHeap(heap, q);
+                                insertHeap(heap, q, p);
                                 pushSet(&seen, q);
                             } else
-                                goUpHeap(heap, q);
+                                goUpHeap(heap, q, p);
                         }
                     }
                 }

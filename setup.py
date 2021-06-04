@@ -7,11 +7,6 @@ _C_DIRECTORIES = ['src/libift',
                   ]
 
 
-pkg_vars = {}
-with open("src/pyift/_version.py") as fp:
-    exec(fp.read(), pkg_vars)
-
-
 # https://stackoverflow.com/questions/54117786/add-numpy-get-include-argument-to-setuptools-without-preinstalled-numpy
 def _my_build_ext(params):
     from setuptools.command.build_ext import build_ext
@@ -40,7 +35,7 @@ def _get_sources():
 
 
 def setup_package():
-    build_requires = []
+    build_requires = ['setuptools_scm']
     try:
         import numpy
     except ImportError:
@@ -53,7 +48,6 @@ def setup_package():
             ]
 
     meta_data = dict(name='pyift',
-                     version=pkg_vars['__version__'],
                      author='Jordao Bragantini',
                      author_email='jordao.bragantini+pyift@gmail.com',
                      description='Python Image Foresting Transform Library',
@@ -63,6 +57,7 @@ def setup_package():
                      license='MIT',
                      packages=['pyift'],
                      cmdclass={'build_ext': _my_build_ext},
+                     use_scm_version=True,
                      setup_requires=build_requires,
                      install_requires=[
                          'numpy',
