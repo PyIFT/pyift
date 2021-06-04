@@ -184,7 +184,7 @@ bool removeHeap(Heap *heap, int index)
         return false;
     
     double value = heap->values[index];
-    if (heap->policy == MINIMUM)
+    if (heap->policy == MAXIMUM)  // FIXME: this was inverted, this is not tested but it was weird
         heap->values[index] = DBL_MAX;
     else
         heap->values[index] = DBL_MIN;
