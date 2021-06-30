@@ -24,6 +24,9 @@ PyObject *_dynamicArcWeightGridExpDecay(PyArrayObject *image, PyArrayObject *see
 
 PyObject *_euclideanDistanceTransformGrid(PyArrayObject *_mask, PyArrayObject *_scales);
 
+PyObject *_orientedSeedCompetitionGrid(PyArrayObject *_image, PyArrayObject *_seeds, PyArrayObject *_mask,
+                                       double alpha, int background_label, double handicap);
+
 PyObject *_watershedFromMinimaGrid(PyArrayObject *_image, PyArrayObject *_mask, PyArrayObject *_H_minima,
                                    double compactness, PyArrayObject *_scales);
 

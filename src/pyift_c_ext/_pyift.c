@@ -82,6 +82,18 @@ PyObject *livewire_path(PyObject *self, PyObject *args)
 }
 
 
+PyObject *oriented_seed_competition_grid(PyObject *self, PyObject *args)
+{
+    PyArrayObject *image = NULL, *seeds = NULL, *mask = NULL;
+    double alpha = 0.0, handicap = 0.0;
+    int background_label = -1;
+    if (!PyArg_ParseTuple(args, "O!O!O!did", &PyArray_Type, &image, &PyArray_Type, &seeds,
+                          &PyArray_Type, &mask, &alpha, &background_label, &handicap))
+        return NULL;
+    return _orientedSeedCompetitionGrid(image, seeds, mask, alpha, background_label, handicap);
+}
+
+
 PyObject *seed_competition_graph(PyObject *self, PyObject *args)
 {
     PyArrayObject *weights = NULL, *indices = NULL, *indptr = NULL, *seeds = NULL;
@@ -90,7 +102,6 @@ PyObject *seed_competition_graph(PyObject *self, PyObject *args)
         return NULL;
     return _seedCompetitionGraph(weights, indices, indptr, seeds);
 }
-
 
 
 PyObject *seed_competition_grid(PyObject *self, PyObject *args)
@@ -120,6 +131,7 @@ static PyMethodDef functions[] = {
     {"dynamic_arc_weight_grid_label", (PyCFunction) dynamic_arc_weight_grid_label, METH_VARARGS},
     {"dynamic_arc_weight_grid_root", (PyCFunction) dynamic_arc_weight_grid_root, METH_VARARGS},
     {"livewire_path", (PyCFunction) livewire_path, METH_VARARGS},
+    {"oriented_seed_competition_grid", (PyCFunction) oriented_seed_competition_grid, METH_VARARGS},
     {"seed_competition_graph", (PyCFunction) seed_competition_graph, METH_VARARGS},
     {"seed_competition_grid", (PyCFunction) seed_competition_grid, METH_VARARGS},
     {"watershed_from_minima_grid", (PyCFunction) watershed_from_minima_grid, METH_VARARGS},
