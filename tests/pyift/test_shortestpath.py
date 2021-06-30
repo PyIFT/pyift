@@ -201,3 +201,54 @@ class TestSeedCompetition:
 
         np.testing.assert_equal(costs, expected_costs)
         np.testing.assert_equal(roots, expected_roots)
+
+    def test_oriented_watershed(self):
+        image = np.array([[18, 17, 16, 15, 14],
+                          [19, 21, 19, 17, 13],
+                          [20, 21, 22, 15, 12],
+                          [9, 9, 11, 13, 11],
+                          [6, 7, 8, 9, 10]])
+
+        seeds = np.array([[0, 0, 0, 0, 0],
+                          [0, 0, 0, 0, 0],
+                          [2, 0, 0, 0, 0],
+                          [1, 1, 0, 0, 0],
+                          [0, 0, 0, 0, 0]])
+
+        mask = np.ones(seeds.shape, dtype=bool)
+        mask[2, 1:3] = False
+        alpha = -0.9
+
+        costs, roots, preds, labels = sp.oriented_seed_competition(seeds, image, background_label=1,
+                                                                   alpha=alpha, handicap=0.1, mask=mask)
+
+        expected_labels = np.array([[2, 2, 2, 2, 2],
+                                    [2, 1, 1, 1, 2],
+                                    [2, -1, -1, 1, 2],
+                                    [1, 1, 1, 1, 2],
+                                    [2, 2, 2, 2, 2]])
+
+        expected_roots = np.full_like(expected_labels, -1)
+        expected_roots[expected_labels == 1] = 16
+        expected_roots[expected_labels == 2] = 10
+
+        expected_preds = np.array([[5, 0, 1, 2, 3],
+                                   [10, 7, 8, 13, 4],
+                                   [-1, -1, -1, 18, 9],
+                                   [16, -1, 16, 17, 14],
+                                   [21, 22, 23, 24, 19]])
+
+        expected_costs = np.array([[1, 1, 1, 1, 1],
+                                   [1, 2, 2, 2, 1],
+                                   [0, 0, 0, 2, 1],
+                                   [0, 0, 2, 2, 1],
+                                   [1, 1, 1, 1, 1]])
+
+        expected_costs = np.where(expected_labels == 1,
+                                  (1 + alpha) * expected_costs,
+                                  (1 + alpha) * expected_costs)
+
+        np.testing.assert_equal(labels[mask], expected_labels[mask])
+        np.testing.assert_equal(roots[mask], expected_roots[mask])
+        np.testing.assert_equal(preds[mask], expected_preds[mask])
+        np.testing.assert_allclose(costs[mask], expected_costs[mask])

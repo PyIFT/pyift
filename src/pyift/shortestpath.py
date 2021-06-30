@@ -356,3 +356,83 @@ def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None, 
         H_minima = np.full_like(image, fill_value=H_minima)
 
     return _pyift.watershed_from_minima_grid(image, mask.astype(bool), H_minima, compactness, scales)
+
+
+def oriented_seed_competition(seeds: np.ndarray, image: np.ndarray, alpha: float, background_label: int,
+                              handicap: float = 0.0, mask: Optional[np.ndarray] = None) \
+        -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Performs the shortest path classification from the `seeds` nodes
+    using the image foresting transform algorithm [1]_.
+
+    Parameters
+    ----------
+    seeds : array_like
+        Positive values are the labels and shortest path sources,
+        non-positives are ignored.
+    image : array_like
+        Image data, seed competition is performed in the image grid graph,
+        mutual exclusive with `graph`.
+    alpha : float
+        Parameter for controling path orientation, must be between -1 and 1.
+        A negative `alpha` benefits transitions from **brighter to darker** regions for non-background labels.
+        A positive `alpha` benefits transitions from **darker to brighter** regions for non-background labels.
+        The opposite is valid for the background label.
+        If `alpha` is zero no transitions benefits.
+    background_label : int
+        Indicates the background label, it can a negative value to avoid inverted orientations for the background.
+    handicap : float
+        Similar to h-basins penalization, it allows seeds (minima) with small differences to be conquered.
+
+    Returns
+    -------
+    array_like, array_like, array_like, array_like
+        Oriented image foresting transform costs, roots, predecessors and labels maps.
+
+    Examples
+    --------
+    >>> image = np.array([[18, 17, 16, 15, 14],
+    >>>               [19, 21, 19, 17, 13],
+    >>>               [20, 21, 22, 15, 12],
+    >>>               [9, 9, 11, 13, 11],
+    >>>               [6, 7, 8, 9, 10]])
+    >>>
+    >>> seeds = np.array([[0, 0, 0, 0, 0],
+    >>>               [0, 0, 0, 0, 0],
+    >>>               [2, 0, 0, 0, 0],
+    >>>               [1, 1, 0, 0, 0],
+    >>>               [0, 0, 0, 0, 0]])
+    >>>
+    >>> mask = np.ones(seeds.shape, dtype=bool)
+    >>> mask[2, 1:3] = False
+    >>> alpha = -0.9
+    >>>
+    >>> costs, roots, preds, labels = sp.oriented_seed_competition(seeds, image, background_label=1,
+    >>>                                                            alpha=alpha, handicap=0.1, mask=mask)
+
+    References
+    ----------
+    .. [6] Miranda, Paulo AV, and Lucy AC Mansilla. "Oriented image foresting transform segmentation
+           by seed competition." IEEE Transactions on Image Processing 23, no. 1 (2013): 389-398.
+    """
+    if alpha < -1.0 or alpha > 1.0:
+        raise ValueError('`alpha` must be between -1.0 and 1.0.')
+
+    if not isinstance(image, np.ndarray):
+        raise TypeError('`image` must be a `ndarray`.')
+
+    if image.ndim < 2 or image.ndim > 3:
+        raise ValueError('`image` must be a 2 or 3-dimensional array, %d found.' % image.ndim)
+
+    if mask is None:
+        mask = np.ones_like(image, dtype=bool)
+
+    if image.shape != seeds.shape:
+        raise ValueError('`image` and `seeds` must have the same dimensions, %r and %r found.' %
+                         (image.shape, seeds.shape))
+
+    if image.shape != mask.shape:
+        raise ValueError('`image` and `mask` must have the same dimensions, %r and %r found.' %
+                         (image.shape, mask.shape))
+
+    return _pyift.oriented_seed_competition_grid(image, seeds, mask, alpha, background_label, handicap)
