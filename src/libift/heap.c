@@ -136,10 +136,13 @@ void _goDownHeapPosition(Heap *heap, int pos)
 
 inline bool _tryUpdateAge(Heap *heap, int index, int pred_index)
 {
-    if (pred_index >= 0)
+    if (pred_index >= 0) {
         heap->ages[index] = heap->ages[pred_index] + 1;
-    else
+        return true;
+    } else {
         heap->ages[index] = 0;
+        return false;
+    }
 }
 
 
