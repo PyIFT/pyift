@@ -57,7 +57,7 @@ def setup_package():
                      license='MIT',
                      packages=['pyift'],
                      cmdclass={'build_ext': _my_build_ext},
-                     use_scm_version=True,
+                     use_scm_version={'write_to': 'src/pyift/_version.py'},
                      setup_requires=build_requires,
                      install_requires=[
                          'numpy',
