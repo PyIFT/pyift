@@ -67,7 +67,12 @@ docs/_build/
 
 # JetBrains
 .idea
+.history
 
 # Unit testing
 .pytest_cache
 .coverage
+
+# written by setuptools_scm
+**/_version.py
+
