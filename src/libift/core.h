@@ -6,6 +6,8 @@
 extern "C" {
 #endif
 
+#define _USE_MATH_DEFINES  // required by windows
+
 #include <stdbool.h>
 #include <stdlib.h>
 
