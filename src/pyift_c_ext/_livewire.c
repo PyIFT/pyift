@@ -6,6 +6,10 @@
 
 #include <float.h>
 
+#ifndef M_SQRT2
+    #define M_SQRT2 1.41421356237309504880
+#endif
+
 
 static inline double square(double x) {
     return x * x;
