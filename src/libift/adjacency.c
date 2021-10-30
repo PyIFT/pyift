@@ -1,6 +1,7 @@
 #include "adjacency.h"
 #include "sort.h"
 #include <stdlib.h>
+#define _USE_MATH_DEFINES  // necessary for windows
 #include <math.h>
 #include <float.h>
 
