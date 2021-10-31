@@ -207,7 +207,7 @@ def dynamic_arc_weight(seeds: np.ndarray, image: np.ndarray, image_3d: bool = Fa
 
 def distance_transform_edt(mask: np.ndarray, scales: Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Computes the euclidean distance transform using the IFT algorithm [3].
+    Computes the euclidean distance transform using the IFT algorithm [3]_.
 
     Parameters
     ----------
@@ -273,7 +273,7 @@ def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None, 
                           compactness: float = 0.0, scales: Optional[np.ndarray] = None) \
         -> Tuple[np.ndarray, np.ndarray]:
     """
-    Computes the watershed transform on grayscales images from minimum using the IFT algorithm [5].
+    Computes the watershed transform on grayscales images from minimum using the IFT algorithm [5]_.
 
     Parameters
     ----------
@@ -282,7 +282,7 @@ def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None, 
     mask : array_like, optional
         Binary mask of regions to compute the watershed transform.
     H_minima : array_like, float
-        Dynamics threshold for watershed from minima as described in [4].
+        Dynamics threshold for watershed from minima as described in [4]_.
         The greater the value the more the neighboring minima will merge into a single region.
     compactness : float, optional
         Optional parameter to adjust trade-off between distancing from minimum (compact segment) and following the
@@ -362,8 +362,7 @@ def oriented_seed_competition(seeds: np.ndarray, image: np.ndarray, alpha: float
                               handicap: float = 0.0, mask: Optional[np.ndarray] = None) \
         -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
-    Performs the shortest path classification from the `seeds` nodes
-    using the image foresting transform algorithm [1]_.
+    Performs the orinted image-foresting transform described in [6]_.
 
     Parameters
     ----------
