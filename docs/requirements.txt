@@ -4,3 +4,5 @@ sphinx_rtd_theme
 numpy
 scipy
 pyift
+docutils==0.16
+
