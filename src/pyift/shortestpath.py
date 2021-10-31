@@ -269,7 +269,8 @@ def distance_transform_edt(mask: np.ndarray, scales: Optional[np.ndarray] = None
     return distance
 
 
-def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None, H_minima: Union[float, np.ndarray] = 1.0,
+def watershed_from_minima(image: np.ndarray, mask: Optional[np.ndarray] = None,
+                          H_minima: Union[float, np.ndarray] = 1.0,
                           compactness: float = 0.0, scales: Optional[np.ndarray] = None) \
         -> Tuple[np.ndarray, np.ndarray]:
     """
