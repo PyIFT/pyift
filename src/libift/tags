@@ -1,0 +1,39 @@
+Adjacency	adjacency.h	/^} Adjacency;$/
+Coord	core.h	/^} Coord;$/
+Heap	heap.h	/^} Heap;$/
+QCircularQueue	queue.h	/^} QCircularQueue;$/
+QLinkedList	queue.h	/^} QLinkedList;$/
+QNode	queue.h	/^} QNode;$/
+Queue	queue.h	/^} Queue;$/
+Set	set.h	/^} Set;$/
+_createAdjacency	adjacency.c	/^Adjacency *_createAdjacency(int size)$/
+_dad	heap.c	/^inline int _dad(int i)$/
+_goDownHeapPosition	heap.c	/^void _goDownHeapPosition(Heap *heap, int pos)$/
+_goUpHeapPosition	heap.c	/^void _goUpHeapPosition(Heap *heap, int pos)$/
+_greater	heap.c	/^inline bool _greater(Heap *heap, int i, int j)$/
+_leftSon	heap.c	/^inline int _leftSon(int i)$/
+_lower	heap.c	/^inline bool _lower(Heap *heap, int i, int j)$/
+_rightSon	heap.c	/^inline int _rightSon(int i)$/
+_swap	heap.c	/^inline void _swap(Heap *heap, int i, int j)$/
+argSortFloat	sort.c	/^void argSortFloat(float *values, int *indices, int/
+circularAdjacency	adjacency.c	/^Adjacency *circularAdjacency(float radii)$/
+createHeap	heap.c	/^Heap *createHeap(int size, double *values)$/
+createQueue	queue.c	/^Queue *createQueue(int max_value, long n_elem, int/
+destroyAdjacency	adjacency.c	/^void destroyAdjacency(Adjacency **adj_address)$/
+destroyHeap	heap.c	/^void destroyHeap(Heap **heap_address)$/
+destroySet	set.c	/^void destroySet(Set **head_address)$/
+goDownHeap	heap.c	/^void goDownHeap(Heap *heap, int index)$/
+goUpHeap	heap.c	/^void goUpHeap(Heap *heap, int index)$/
+insertHeap	heap.c	/^bool insertHeap(Heap *heap, int index)$/
+leftSide	adjacency.c	/^Adjacency *leftSide(Adjacency *adj, double shift)$/
+lengthSet	set.c	/^int lengthSet(const Set *head)$/
+nodeColor	heap.h	/^} nodeColor;$/
+popHeap	heap.c	/^int popHeap(Heap *heap)$/
+pushSet	set.c	/^void pushSet(Set **head_address, int value)$/
+removalPolicy	heap.h	/^} removalPolicy;$/
+removeHeap	heap.c	/^bool removeHeap(Heap *heap, int index)$/
+resetHeap	heap.c	/^void resetHeap(Heap *heap)$/
+reverseSet	set.c	/^void reverseSet(Set **head_address)$/
+rightSide	adjacency.c	/^Adjacency *rightSide(Adjacency *adj, double shift)/
+sortOrder	sort.h	/^} sortOrder;$/
+sphericAdjacency	adjacency.c	/^Adjacency *sphericAdjacency(float radii)$/
