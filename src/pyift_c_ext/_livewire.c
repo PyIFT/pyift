@@ -81,31 +81,45 @@ PyObject *_livewirePath(PyArrayObject *image, PyArrayObject *saliency, PyArrayOb
                 int q = coordToIndex(&shape, &v);
                 if (costs_ptr[p] < costs_ptr[q])
                 {
-                    Coord ll = adjacentCoord(&u, left, i);
-                    int l = (validCoord(&shape, &ll) ? coordToIndex(&shape, &ll) : p);
+                    bool at_border = false;
 
+                    int l = p;
+                    Coord ll = adjacentCoord(&u, left, i);
+                    if (validCoord(&shape, &ll))
+                        l = coordToIndex(&shape, &ll);
+                    else
+                        at_border = true;
+
+                    int r = p;
                     Coord rr = adjacentCoord(&u, right, i);
-                    int r = (validCoord(&shape, &rr) ? coordToIndex(&shape, &rr) : p);
+                    if (validCoord(&shape, &rr))
+                        r = coordToIndex(&shape, &rr);
+                    else
+                        at_border = true;
                     
                     // avoid crossing existing path
                     if (!labels_ptr[l] || !labels_ptr[r])
                     {
-                        double dist = distance(image_ptr, l, r, d);
+                        double dist = 0.0;
+                        if (at_border)
+                            dist = 0.1; // hard-coded value
+                        else {
+                            dist = distance(image_ptr, l, r, d);
+                            switch (livewire_fun)
+                            {
+                                case EXP:
+                                    dist = exp( - dist / param1);
+                                    break;
 
-                        switch (livewire_fun)
-                        {
-                            case EXP:
-                                dist = exp( - dist / param1);
-                                break;
-
-                            case EXPSAL:
-                                dist = exp( - dist / param1);
-                                double sal_dist = distance(saliency_ptr, p, q, sal_d);
-                                dist *= exp( - sal_dist / param2);
-                                break;
+                                case EXPSAL:
+                                    dist = exp( - dist / param1);
+                                    double sal_dist = distance(saliency_ptr, p, q, sal_d);
+                                    dist *= exp( - sal_dist / param2);
+                                    break;
+                            }
                         }
 
-                        dist = costs_ptr[p] + dist;
+                        dist += costs_ptr[p];
 
                         if (dist < costs_ptr[q])
                         {
