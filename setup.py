@@ -68,7 +68,7 @@ def setup_package():
                      package_dir={'': 'src'},
                      ext_modules=exts,
                      classifiers=[
-                         'Development Status :: 3 - Beta',
+                         'Development Status :: 4 - Beta',
                          'Intended Audience :: Developers',
                          'Intended Audience :: Education',
                          'Intended Audience :: Science/Research',
