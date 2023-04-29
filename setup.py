@@ -64,6 +64,7 @@ def setup_package():
                          'numpy',
                          'scipy',
                      ],
+                     python_requires=">=3.8",
                      package_dir={'': 'src'},
                      ext_modules=exts,
                      classifiers=[
@@ -74,6 +75,10 @@ def setup_package():
                          'License :: OSI Approved :: MIT License',
                          'Programming Language :: C',
                          'Programming Language :: Python :: 3',
+                         'Programming Language :: Python :: 3 :: Only',
+                         'Programming Language :: Python :: 3.8',
+                         'Programming Language :: Python :: 3.9',
+                         'Programming Language :: Python :: 3.10',
                          'Topic :: Scientific/Engineering',
                          'Topic :: Software Development :: Libraries :: Python Modules',
                      ],
