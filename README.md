@@ -1,6 +1,8 @@
 # PyIFT
 
-[![Build Status](https://api.travis-ci.org/PyIFT/pyift.svg?branch=master)](https://travis-ci.com/github/PyIFT/pyift)
+[![PyPI](https://img.shields.io/pypi/v/pyift?color=green)](https://pypi.org/project/pyift)
+[![Python Version](https://img.shields.io/pypi/pyversions/pyift.svg?color=green)](https://python.org)
+[![tests](https://github.com/PyIFT/pyift/workflows/tests/badge.svg)](https://github.com/PyIFT/pyift/actions)
 [![codecov](https://codecov.io/gh/PyIFT/pyift/branch/master/graph/badge.svg)](https://codecov.io/gh/PyIFT/pyift)
 [![Documentation Status](https://readthedocs.org/projects/pyift/badge/?version=latest)](https://pyift.readthedocs.io/en/latest)
 
