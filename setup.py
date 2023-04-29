@@ -15,7 +15,8 @@ def _my_build_ext(params):
         def finalize_options(self):
             build_ext.finalize_options(self)
             # Prevent numpy from thinking it is still in its setup process:
-            __builtins__.__NUMPY_SETUP__ = False
+            import builtins
+            builtins.__NUMPY_SETUP__ = False
             import numpy
             self.include_dirs.append(numpy.get_include())
 
