@@ -64,7 +64,7 @@ def setup_package():
                          'numpy>=2',
                          'scipy',
                      ],
-                     python_requires=">=3.8",
+                     python_requires=">=3.9",
                      package_dir={'': 'src'},
                      ext_modules=exts,
                      classifiers=[
@@ -76,7 +76,6 @@ def setup_package():
                          'Programming Language :: C',
                          'Programming Language :: Python :: 3',
                          'Programming Language :: Python :: 3 :: Only',
-                         'Programming Language :: Python :: 3.8',
                          'Programming Language :: Python :: 3.9',
                          'Programming Language :: Python :: 3.10',
                          'Programming Language :: Python :: 3.11',
