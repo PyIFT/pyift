@@ -4,8 +4,12 @@ import _pyift
 from typing import Optional, Tuple, Dict, Union
 
 
-def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, graph: Optional[sparse.csr_matrix] = None,
-                     image_3d: bool = False) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def seed_competition(
+    seeds: np.ndarray,
+    image: Optional[np.ndarray] = None,
+    graph: Optional[Union[sparse.csr_matrix, sparse.csr_array]] = None,
+    image_3d: bool = False,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Performs the shortest path classification from the `seeds` nodes
     using the image foresting transform algorithm [1]_.
@@ -102,8 +106,8 @@ def seed_competition(seeds: np.ndarray, image: Optional[np.ndarray] = None, grap
         return _pyift.seed_competition_grid(image, seeds)
 
     # graph is provided
-    if not isinstance(graph, sparse.csr_matrix):
-        raise TypeError('`graph` must be a `csr_matrix`.')
+    if not isinstance(graph, (sparse.csr_matrix, sparse.csr_array)):
+        raise TypeError('`graph` must be a `csr_matrix` or `csr_array`.')
 
     if graph.shape[0] != graph.shape[1]:
         raise ValueError('`graph` must be a square adjacency matrix, current shape %r.' % graph.shape)
