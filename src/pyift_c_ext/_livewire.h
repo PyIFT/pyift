@@ -12,6 +12,7 @@ extern "C" {
 #define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL PYIFT_ARRAY_API
 #include "numpy/arrayobject.h"
+#include "numpy/npy_math.h"
 
 
 typedef enum {

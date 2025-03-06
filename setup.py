@@ -61,7 +61,7 @@ def setup_package():
                      use_scm_version={'write_to': 'src/pyift/_version.py'},
                      setup_requires=build_requires,
                      install_requires=[
-                         'numpy',
+                         'numpy>=2',
                          'scipy',
                      ],
                      python_requires=">=3.8",
@@ -79,6 +79,9 @@ def setup_package():
                          'Programming Language :: Python :: 3.8',
                          'Programming Language :: Python :: 3.9',
                          'Programming Language :: Python :: 3.10',
+                         'Programming Language :: Python :: 3.11',
+                         'Programming Language :: Python :: 3.12',
+                         'Programming Language :: Python :: 3.13',
                          'Topic :: Scientific/Engineering',
                          'Topic :: Software Development :: Libraries :: Python Modules',
                      ],
